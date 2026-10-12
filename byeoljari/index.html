@@ -688,7 +688,6 @@ const TYPE_LIGHT = { '공모전':'blue', '프로젝트':'violet', '수업':'viol
 const LIGHT_LEGEND = [['공모전','blue'],['수업 · 프로젝트','violet'],['동아리','lime'],['인턴','gold'],['대외활동','teal'],['봉사','orange'],['개인 경험','pink'],['아르바이트 · 기타','silver']];
 const lightOf = e => TYPE_LIGHT[e.type] || 'silver';
 const starOf = e => STARLIGHT[lightOf(e)];
-const catLabel = name => /자리$/.test(name) ? name : name + '자리';
 
 let sim = null, zoomT = null, showLabels = recall('labels') !== '0', showLines = recall('lines') !== '0';
 const posCache = new Map();
@@ -753,7 +752,7 @@ function renderGraphView(){
       <span><svg width="22" height="10" viewBox="0 0 22 10" aria-hidden="true"><line x1="1" y1="5" x2="21" y2="5" stroke="#34a866" stroke-width="2" stroke-dasharray="3 2"/></svg>방금 기록한 별 (다시 열면 사라져요)</span>
       <span><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><ellipse cx="7" cy="8" rx="4.5" ry="6.5" fill="none" stroke="#5b8fd6" stroke-width="1.8" transform="rotate(25 7 8)"/></svg>관측 예정 별</span>
       <span><svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="3" fill="#8e97ad"/></svg>작은 회색 별 = 태그</span>
-      <span>별자리 이름 = 전공 분야</span>
+      <span>은은한 빛 속 큰 글자 = 전공 분야</span>
     </div>
   </div>`;
   $('#g-labels').onclick = e => { showLabels = !showLabels; remember('labels', showLabels ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLabels); if (typeof d3 !== 'undefined') d3.selectAll('#graph-svg .lbl').attr('display', d => labelVisible(d) ? null : 'none'); };
@@ -849,7 +848,7 @@ function drawGraph(){
       s.append('circle').attr('r', d.r).attr('fill', 'transparent');
       s.append('path').attr('class', 'ret').attr('d', 'M-34 -14V-20H-28M28 -20H34V-14M34 14V20H28M-28 20H-34V14');
       s.append('text').attr('class', 'lbl').attr('y', 4).attr('text-anchor', 'middle').attr('fill', '#9fb4e0').attr('fill-opacity', .85)
-        .attr('font-size', 12.5).attr('font-weight', 600).attr('letter-spacing', '.24em').text(catLabel(d.label));
+        .attr('font-size', 12.5).attr('font-weight', 600).attr('letter-spacing', '.24em').text(d.label);
     } else {
       s.append('circle').attr('r', 12).attr('fill', 'transparent');
       s.append('ellipse').attr('rx', 6).attr('ry', 10).attr('transform', 'rotate(25)').attr('fill', 'rgba(127,176,255,.08)')
@@ -914,7 +913,7 @@ function openPanel(d){
   } else if (d.type === 'cat') {
     const c = d.ref;
     const es = state.experiences.filter(e => catsForExp(e).includes(c.id));
-    h += `<div class="muted">전공 분야 · ${esc(c.group)}</div><h3>${esc(catLabel(c.name))}</h3>
+    h += `<div class="muted">전공 분야 · ${esc(c.group)}</div><h3>${esc(c.name)}</h3>
       <p class="muted">이 분야와 이어진 경험 ${es.length}개</p>
       <div>${es.slice(0, 8).map(e => `<button class="list-item" data-open-exp="${e.id}"><span>${esc(e.title)}</span><span class="muted">${e.date.slice(0, 7)}</span></button>`).join('')}</div>
       <div class="muted" style="font-size:12px">연결 키워드: ${c.keywords.map(esc).join(', ') || '없음'}</div>`;
@@ -1631,7 +1630,7 @@ function openWelcome(next){
 const TOUR = [
   { title:'너의 별자리는?', text:'지금까지 무엇을 해 왔는지, 나는 어떤 사람인지, 앞으로 무엇을 채워야 하는지 스스로 발견하는 경험 기록 서비스예요. 예시 학생 ‘한별’의 별자리로 먼저 둘러볼게요.' },
   { view:'graph', target:'#graph', title:'경험이 별이 돼요', text:'기록한 경험은 밝은 별, 경험에서 나온 태그는 작은 회색 별이 돼요. 같은 태그를 가진 경험끼리 별자리 선으로 이어져요. 별을 눌러 보거나 끌어서 움직일 수 있어요.' },
-  { view:'graph', target:'#graph-legend', title:'별빛 읽기', text:'별의 색은 활동 유형이에요. 중요도와 성장 별점이 클수록 별이 크고 밝아져요. 전공 분야는 별자리 이름으로, 앞으로 채우고 싶은 경험은 파란 타원의 관측 예정 별로 보여요.' },
+  { view:'graph', target:'#graph-legend', title:'별빛 읽기', text:'별의 색은 활동 유형이에요. 중요도와 성장 별점이 클수록 별이 크고 밝아져요. 전공 분야는 은은한 빛 속 큰 글자로, 앞으로 채우고 싶은 경험은 파란 타원의 관측 예정 별로 보여요.' },
   { view:'graph', target:'#btn-record', title:'언제든 기록하기', text:'정해진 양식 없이 자유롭게 쓰면 돼요. 내용에서 태그를 추천하고, 막힐 때는 생각을 돕는 질문을 건네요. 어떤 태그를 달지는 당신이 정해요.' },
   { view:'records', target:'#records-grid', title:'모든 기록을 한곳에', text:'쌓인 경험을 검색하고, 중요도나 성장 순으로 다시 볼 수 있어요.' },
   { view:'ability', target:'#ability-main', title:'능력치', text:'경험의 개수가 아니라 실제로 성장했다고 느낀 정도를 더해 계산해요. 자주 한 것과 크게 성장한 것이 다를 수도 있어요.' },
