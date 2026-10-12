@@ -697,7 +697,8 @@ const starOf = e => STARLIGHT[lightOf(e)];
 let sim = null, zoomT = null, showLabels = recall('labels') !== '0', showLines = recall('lines') !== '0';
 const posCache = new Map();
 let panelNode = null;
-let justAdded = null;   // marks the star recorded in this visit only; gone after a reload
+let justAdded = null;
+let graphFocus = null;   // marks the star recorded in this visit only; gone after a reload
 
 function buildGraph(){
   const nodes = [], links = [], idx = new Map();
@@ -762,7 +763,7 @@ function renderGraphView(){
     </div>
   </div>`;
   $('#g-labels').onclick = e => { showLabels = !showLabels; remember('labels', showLabels ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLabels); if (typeof d3 !== 'undefined') d3.selectAll('#graph-svg .lbl').attr('display', d => labelVisible(d) ? null : 'none'); };
-  $('#g-lines').onclick = e => { showLines = !showLines; remember('lines', showLines ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLines); const g = $('#graph-links'); if (g) g.style.display = showLines ? '' : 'none'; };
+  $('#g-lines').onclick = e => { showLines = !showLines; remember('lines', showLines ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLines); if (graphFocus) graphFocus(panelNode); };
   $('#g-reset').onclick = () => { zoomT = null; drawGraph(); };
   $('#g-add-virt').onclick = () => openVirtualForm();
   requestAnimationFrame(drawGraph);
@@ -815,7 +816,7 @@ function drawGraph(){
   const nebula = g.append('g').attr('aria-hidden', 'true').selectAll('circle').data(nodes.filter(n => n.type === 'cat')).join('circle')
     .attr('r', 110).attr('fill', 'url(#neb)').style('pointer-events', 'none');
 
-  const linkG = g.append('g').attr('id', 'graph-links').style('display', showLines ? null : 'none');
+  const linkG = g.append('g').attr('id', 'graph-links');
   const solid = links.filter(l => l.kind === 'et' || l.kind === 'ec');
   const glow = linkG.append('g').attr('filter', 'url(#lglow)').selectAll('line').data(solid).join('line').attr('class', 'lnk')
     .attr('stroke', '#9fb6ea').attr('stroke-opacity', .22).attr('stroke-width', 6).attr('stroke-linecap', 'round');
@@ -852,7 +853,7 @@ function drawGraph(){
       s.append('circle').attr('r', d.r).attr('fill', 'transparent');
       s.append('path').attr('class', 'ret').attr('d', 'M-34 -14V-20H-28M28 -20H34V-14M34 14V20H28M-28 20H-34V14');
       s.append('text').attr('class', 'lbl').attr('y', 4).attr('text-anchor', 'middle').attr('fill', '#9fb4e0').attr('fill-opacity', .85)
-        .attr('font-size', 12.5).attr('font-weight', 600).attr('letter-spacing', '.24em').text(d.label);
+        .attr('font-size', 12.5).attr('font-weight', 600).attr('letter-spacing', '.06em').text(d.label);
     } else {
       s.append('circle').attr('r', 12).attr('fill', 'transparent');
       s.append('ellipse').attr('rx', 6).attr('ry', 10).attr('transform', 'rotate(25)').attr('fill', 'rgba(127,176,255,.08)')
@@ -867,8 +868,11 @@ function drawGraph(){
   for (const l of links) { adj.get(l.source)?.add(l.target); adj.get(l.target)?.add(l.source); }
   const focus = id => {
     node.attr('opacity', d => !id || adj.get(id).has(d.id) ? 1 : .2);
-    linkG.selectAll('.lnk').attr('opacity', d => !id || d.source.id === id || d.target.id === id ? 1 : .08);
+    // with 별자리 선 off, only the hovered or selected star's own lines show
+    linkG.selectAll('.lnk').attr('opacity', d => d.source.id === id || d.target.id === id ? 1 : !id ? (showLines ? 1 : 0) : (showLines ? .08 : 0));
   };
+  graphFocus = focus; focus(null);
+
   node.on('mouseenter', (e, d) => focus(d.id)).on('mouseleave', () => focus(panelNode))
     .on('click', (e, d) => { e.stopPropagation(); openPanel(d); focus(d.id); })
     .on('keydown', (e, d) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPanel(d); focus(d.id); } });
@@ -893,7 +897,7 @@ function drawGraph(){
     .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
   if (panelNode) { const pn = nodes.find(n => n.id === panelNode); if (pn) { openPanel(pn); focus(pn.id); } else closePanel(); }
 }
-function closePanel(){ panelNode = null; const p = $('#graph-panel'); if (p) p.hidden = true; if (typeof d3 !== 'undefined') { d3.selectAll('#graph-svg .node').classed('selected', false); d3.selectAll('#graph-svg .node').attr('opacity', 1); d3.selectAll('#graph-svg .lnk').attr('opacity', 1); } }
+function closePanel(){ panelNode = null; const p = $('#graph-panel'); if (p) p.hidden = true; if (typeof d3 !== 'undefined') { d3.selectAll('#graph-svg .node').classed('selected', false); if (graphFocus) graphFocus(null); } }
 function openPanel(d){
   panelNode = d.id;
   if (typeof d3 !== 'undefined') d3.selectAll('#graph-svg .node').classed('selected', n => n.id === d.id);
