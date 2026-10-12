@@ -97,7 +97,7 @@ button.chip:hover{border-color:var(--line)}
 .chip small{opacity:.7;font-size:11px}
 
 /* sky */
-.sky{position:relative;background:radial-gradient(120% 90% at 50% 0%,var(--sky-2),var(--sky) 70%);border-radius:var(--r-tile);height:clamp(460px,72vh,780px);overflow:hidden;color:var(--sky-fg);color-scheme:dark}
+.sky{position:relative;background:radial-gradient(60% 55% at 18% 20%,rgba(70,90,255,.28),transparent 60%),radial-gradient(45% 50% at 88% 85%,rgba(47,211,255,.16),transparent 60%),radial-gradient(40% 45% at 70% 25%,rgba(190,120,255,.14),transparent 60%),radial-gradient(120% 90% at 50% 0%,#0d1530,#04060c 72%);border-radius:var(--r-tile);height:clamp(460px,72vh,780px);overflow:hidden;color:var(--sky-fg);color-scheme:dark}
 .sky svg{width:100%;height:100%;display:block;cursor:grab}
 .sky svg:active{cursor:grabbing}
 .sky-tools{position:absolute;top:16px;left:16px;right:16px;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none}
@@ -124,9 +124,26 @@ button.chip:hover{border-color:var(--line)}
 .sky-empty.compact h3{font-size:20px}
 .sky-empty.compact p{font-size:15px}
 .node{cursor:pointer;outline:none}
-.node .ring{fill:none;stroke:#fff;stroke-width:2;opacity:0;transition:opacity .15s}
-.node:focus-visible .ring{opacity:.9;stroke:#2997ff}
-.node.selected .ring{opacity:.9}
+.node .ret{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;opacity:0;transition:opacity .15s}
+.node:focus-visible .ret{opacity:.9;stroke:#2997ff}
+.node.selected .ret{opacity:1}
+.grad{background:linear-gradient(90deg,#2f6bff,#2fb8ff 55%,#3fd6a6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sky-seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px)}
+.sky-seg button{border:0;border-radius:999px;padding:7px 14px;font-size:13px;color:#fff;background:transparent}
+.sky-seg button:hover{background:rgba(255,255,255,.12)}
+.sky-seg button[aria-pressed="true"]{color:#000;background:rgba(255,255,255,.9)}
+.starlight{display:flex;flex-direction:column;gap:18px}
+.sl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px}
+.sl-chip{background:#0d1428;border-radius:16px;padding:14px 16px;display:flex;gap:12px;align-items:center;font-size:15px;font-weight:600}
+.sl-chip i{width:13px;height:13px;border-radius:50%;flex:none}
+.sl-marks{display:flex;gap:10px 26px;flex-wrap:wrap;font-size:14px;color:var(--fg-2)}
+.sl-marks span{display:inline-flex;align-items:center;gap:8px}
+.tdot{width:8px;height:8px;border-radius:50%;display:inline-block;align-self:center;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.sky-panel .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px}
+.welcome{display:flex;flex-direction:column;gap:16px;padding-top:28px}
+.welcome .mark{width:44px;height:44px;color:var(--link)}
+.welcome h2{font-size:28px;font-weight:800;letter-spacing:-.03em}
+.welcome p.lead{color:var(--fg-2);font-size:16px}
 .node text{pointer-events:none;paint-order:stroke;stroke:rgba(4,6,12,.85);stroke-width:3px}
 .twinkle{animation:tw 4s ease-in-out infinite}
 @keyframes tw{50%{opacity:.15}}
@@ -140,7 +157,7 @@ button.chip:hover{border-color:var(--line)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px}
 .rcard{background:var(--tile);border-radius:var(--r-card);padding:22px;display:flex;flex-direction:column;gap:10px;text-align:left;border:0;color:inherit;min-width:0;transition:transform .2s}
 .rcard:hover{transform:translateY(-2px)}
-.rcard .meta{font-size:12px;color:var(--fg-2);display:flex;gap:6px;flex-wrap:wrap}
+.rcard .meta{font-size:12px;color:var(--fg-2);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .rcard h3{font-size:19px;font-weight:700;line-height:1.3}
 .rcard .ex{font-size:14px;color:var(--fg-2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .rcard .rates{display:flex;gap:14px;font-size:12px;color:var(--fg-2);margin-top:auto;flex-wrap:wrap}
@@ -453,7 +470,7 @@ function hintKeywords(name){
 const KEY = 'byeoljari.v1';
 let storageOK = true;
 try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); } catch { storageOK = false; }
-const emptyState = () => ({ version:1, tutorialDone:false, profile:{ name:'', majors:[] }, categories:[], experiences:[], tagCats:{}, goal:{ name:'', areas:[] }, virtuals:[] });
+const emptyState = () => ({ version:1, tutorialDone:false, profile:{ name:'', majors:[] }, categories:[], experiences:[], tagCats:{}, goal:{ name:'', areas:[] }, virtuals:[], lastAddedId:null });
 let state = emptyState();
 let demo = false;          // true while the tutorial shows the sample student
 let realState = null;      // the viewer's own data, parked during the tutorial
@@ -549,6 +566,7 @@ function makeSample(){
     E('2026-09-03','공모전','공공데이터 활용 공모전 예선',3.5,3,['데이터 분석','시각화','비즈니스 이해'],'공공데이터로 지역 상권 변화를 분석해 예선을 통과했다. SQL을 몰라 데이터 추출에서 시간이 오래 걸렸다.'),
   ];
   s.goal = { name:'Data Analyst', areas:['데이터 분석','SQL','통계','문제 정의','비즈니스 이해','시각화'] };
+  s.lastAddedId = s.experiences[s.experiences.length - 1].id;
   s.virtuals = [
     { id: uid(), label:'SQL', links:['데이터 분석','Python'], createdAt:'2026-09-10', realizedAt:null, realizedBy:null },
     { id: uid(), label:'통계 프로젝트', links:['통계','데이터 분석'], createdAt:'2026-09-10', realizedAt:null, realizedBy:null },
@@ -562,11 +580,11 @@ function toast(msg){
   const el = document.createElement('div'); el.className = 'toast'; el.textContent = msg;
   $('#toasts').appendChild(el); setTimeout(() => el.remove(), 3600);
 }
-function openModal(html, cls = ''){
+function openModal(html, cls = '', locked = false){
   const root = $('#modal-root');
-  root.innerHTML = `<div class="layer" data-layer><div class="sheet ${cls}" role="dialog" aria-modal="true">${html}</div></div>`;
+  root.innerHTML = `<div class="layer" data-layer ${locked ? 'data-locked' : ''}><div class="sheet ${cls}" role="dialog" aria-modal="true">${html}</div></div>`;
   const layer = root.firstElementChild;
-  layer.addEventListener('mousedown', e => { if (e.target === layer) closeModal(); });
+  if (!locked) layer.addEventListener('mousedown', e => { if (e.target === layer) closeModal(); });
   $$('[data-close]', layer).forEach(b => b.addEventListener('click', closeModal));
   document.body.style.overflow = 'hidden';
   return layer;
@@ -583,7 +601,7 @@ function ask(msg, ok = '확인', danger = false){
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if ($('#confirm-root').innerHTML) { $('#confirm-root').innerHTML = ''; return; }
-  if ($('#modal-root').innerHTML) closeModal();
+  if ($('#modal-root').innerHTML && !$('#modal-root [data-locked]')) closeModal();
 });
 
 /* ---------- stars widget ---------- */
@@ -631,7 +649,15 @@ const hero = (eyebrow, title, lead, extra = '') => `<div class="hero"><div class
 const who = () => state.profile.name || '당신';
 
 /* ================= GRAPH ================= */
-let sim = null, zoomT = null, showLabels = recall('labels') !== '0';
+// Star colours: one hue per activity type, so a glance tells what kind of experience a star is.
+const STARLIGHT = { blue:['#6aa8ff','#a9ccff'], violet:['#c6b6ff','#ddd3ff'], lime:['#a8f06a','#cff7a8'], gold:['#ffd23f','#ffe489'], teal:['#4fe3d0','#9ff3e6'], orange:['#ff9f45','#ffc48f'], pink:['#ff6f91','#ffaabd'], silver:['#d9dee8','#e6eaf2'] };
+const TYPE_LIGHT = { '공모전':'blue', '프로젝트':'violet', '수업':'violet', '동아리':'lime', '대외활동':'teal', '봉사':'orange', '인턴':'gold', '아르바이트':'silver', '개인 경험':'pink', '기타':'silver' };
+const LIGHT_LEGEND = [['공모전','blue'],['수업 · 프로젝트','violet'],['동아리','lime'],['인턴','gold'],['대외활동','teal'],['봉사','orange'],['개인 경험','pink'],['아르바이트 · 기타','silver']];
+const lightOf = e => TYPE_LIGHT[e.type] || 'silver';
+const starOf = e => STARLIGHT[lightOf(e)];
+const catLabel = name => /자리$/.test(name) ? name : name + '자리';
+
+let sim = null, zoomT = null, showLabels = recall('labels') !== '0', showLines = recall('lines') !== '0';
 const posCache = new Map();
 let panelNode = null;
 
@@ -653,9 +679,9 @@ function buildGraph(){
     for (const l of v.links) if (idx.has('t:' + norm(l))) links.push({ source:'v:' + v.id, target:'t:' + norm(l), kind:'v' });
   }
   for (const n of nodes) {
-    if (n.type === 'exp') n.r = 5 + score(n.ref) * 2.6;
-    else if (n.type === 'tag') n.r = 3.5 + Math.sqrt(n.count) * 2.2;
-    else if (n.type === 'cat') n.r = 20 + Math.sqrt(links.filter(l => l.target === n.id).length) * 3;
+    if (n.type === 'exp') n.r = 3.6 + score(n.ref) * 0.85;
+    else if (n.type === 'tag') n.r = 1.7 + Math.sqrt(n.count) * 0.55;
+    else if (n.type === 'cat') n.r = 26;
     else n.r = 10;
     const p = posCache.get(n.id);
     if (p) { n.x = p.x; n.y = p.y; } else { n.x = (Math.random() - .5) * 300; n.y = (Math.random() - .5) * 300; }
@@ -664,30 +690,39 @@ function buildGraph(){
 }
 
 function renderGraphView(){
-  const n = state.experiences.length, tags = allTags().length;
+  const n = state.experiences.length;
   const virt = state.virtuals.filter(v => !v.realizedAt).length;
   $('#view-graph').innerHTML = hero(
     'Experience Graph',
-    `${esc(who())}의 별자리.`,
-    n ? `경험 ${n}개와 태그 ${tags}개가 이어져 있어요.${virt ? ` 아직 채워지지 않은 가상 별이 ${virt}개 있어요.` : ''} 큰 별일수록 소중하고, 크게 성장한 경험이에요.` : '경험을 기록하면 별이 떠요. 같은 태그를 가진 경험끼리 이어지며 나만의 별자리가 만들어져요.'
+    `${esc(who())}의 <span class="grad">별자리.</span>`,
+    n ? `경험 ${n}개가 저마다의 빛깔로 떠 있어요. 별의 색은 활동 유형, 크기와 밝기는 중요도와 성장이에요.${virt ? ` 아직 채우지 않은 관측 예정 별이 ${virt}개 있어요.` : ''}` : '경험을 기록하면 별이 떠요. 같은 태그를 가진 경험끼리 이어지며 나만의 별자리가 만들어져요.'
   ) + `
   <div class="sky" id="graph">
     <svg id="graph-svg" role="img" aria-label="경험과 태그가 연결된 별자리 그래프"></svg>
     <div class="sky-tools">
-      <button class="sky-btn" id="g-add-virt">+ 가상 별</button>
-      <button class="sky-btn" id="g-labels" aria-pressed="${showLabels}">이름 보기</button>
-      <button class="sky-btn" id="g-reset">가운데로</button>
-    </div>
-    <div class="legend" id="graph-legend">
-      <span><i class="lg" style="background:var(--exp);box-shadow:0 0 8px var(--exp)"></i>경험</span>
-      <span><i class="lg" style="background:var(--tag);width:7px;height:7px"></i>태그</span>
-      <span><i class="lg" style="border:1.5px solid var(--cat);background:rgba(41,151,255,.15)"></i>전공 분야</span>
-      <span><i class="lg" style="border:1.5px dashed var(--virt)"></i>가상 별</span>
+      <div class="sky-seg">
+        <button id="g-add-virt">+ 관측 예정 별</button>
+        <button id="g-labels" aria-pressed="${showLabels}">별 이름</button>
+        <button id="g-lines" aria-pressed="${showLines}">별자리 선</button>
+        <button id="g-reset">가운데로</button>
+      </div>
     </div>
     <div class="sky-panel" id="graph-panel" hidden></div>
     ${n ? '' : `<div class="sky-empty${state.categories.length || virt ? ' compact' : ''}"><div><h3>아직 하늘이 비어 있어요.</h3><p>첫 번째 경험을 기록하면 이곳에 별이 떠요. 거창하지 않아도 괜찮아요. 나에게 의미 있었던 일이면 충분해요.</p><button class="btn btn-primary" data-new-record>첫 경험 기록하기</button>${state.categories.length ? '' : '<button class="link" style="color:#2997ff" data-go="me">먼저 전공을 설정할래요</button>'}</div></div>`}
+  </div>
+  <div class="tile starlight" id="graph-legend">
+    <div><div class="eyebrow">별빛 읽기</div><h2 style="margin-top:4px">색은 활동 유형, 밝기는 그 경험의 무게예요.</h2></div>
+    <div class="sl-grid">${LIGHT_LEGEND.map(([name, k]) => `<div class="sl-chip"><i style="background:${STARLIGHT[k][0]};box-shadow:0 0 10px ${STARLIGHT[k][0]}"></i><span style="color:${STARLIGHT[k][1]}">${name}</span></div>`).join('')}</div>
+    <div class="sl-marks">
+      <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>선택한 별</span>
+      <span><svg width="22" height="10" viewBox="0 0 22 10" aria-hidden="true"><line x1="1" y1="5" x2="21" y2="5" stroke="#34a866" stroke-width="3" stroke-dasharray="5 3"/></svg>방금 기록한 별</span>
+      <span><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><ellipse cx="7" cy="8" rx="4.5" ry="6.5" fill="none" stroke="#5b8fd6" stroke-width="1.8" transform="rotate(25 7 8)"/></svg>관측 예정 별</span>
+      <span><svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="3" fill="#8e97ad"/></svg>작은 회색 별 = 태그</span>
+      <span>별자리 이름 = 전공 분야</span>
+    </div>
   </div>`;
   $('#g-labels').onclick = e => { showLabels = !showLabels; remember('labels', showLabels ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLabels); if (typeof d3 !== 'undefined') d3.selectAll('#graph-svg .lbl').attr('display', d => labelVisible(d) ? null : 'none'); };
+  $('#g-lines').onclick = e => { showLines = !showLines; remember('lines', showLines ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLines); const g = $('#graph-links'); if (g) g.style.display = showLines ? '' : 'none'; };
   $('#g-reset').onclick = () => { zoomT = null; drawGraph(); };
   $('#g-add-virt').onclick = () => openVirtualForm();
   requestAnimationFrame(drawGraph);
@@ -703,19 +738,33 @@ function drawGraph(){
   const svg = d3.select('#graph-svg').attr('viewBox', [-W/2, -H/2, W, H]);
   svg.selectAll('*').remove();
   const defs = svg.append('defs');
-  const glow = defs.append('filter').attr('id', 'glow').attr('x', '-100%').attr('y', '-100%').attr('width', '300%').attr('height', '300%');
-  glow.append('feGaussianBlur').attr('stdDeviation', 4).attr('result', 'b');
-  const fm = glow.append('feMerge'); fm.append('feMergeNode').attr('in', 'b'); fm.append('feMergeNode').attr('in', 'SourceGraphic');
-  const rg = defs.append('radialGradient').attr('id', 'starg');
-  rg.append('stop').attr('offset', '0%').attr('stop-color', '#fffaf0');
-  rg.append('stop').attr('offset', '45%').attr('stop-color', '#ffe3a3');
-  rg.append('stop').attr('offset', '100%').attr('stop-color', '#f0b44c');
+  for (const [k, [c]] of Object.entries(STARLIGHT)) {
+    const g = defs.append('radialGradient').attr('id', 'bl-' + k);
+    g.append('stop').attr('offset', '0%').attr('stop-color', c).attr('stop-opacity', .5);
+    g.append('stop').attr('offset', '45%').attr('stop-color', c).attr('stop-opacity', .16);
+    g.append('stop').attr('offset', '100%').attr('stop-color', c).attr('stop-opacity', 0);
+  }
+  const neb = defs.append('radialGradient').attr('id', 'neb');
+  neb.append('stop').attr('offset', '0%').attr('stop-color', '#8fb0ff').attr('stop-opacity', .2);
+  neb.append('stop').attr('offset', '100%').attr('stop-color', '#8fb0ff').attr('stop-opacity', 0);
+  defs.append('filter').attr('id', 'lglow').attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%')
+    .append('feGaussianBlur').attr('stdDeviation', 2.5);
+  defs.append('filter').attr('id', 'mw').attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%')
+    .append('feGaussianBlur').attr('stdDeviation', 30);
 
-  // fixed background stars (seeded so they don't jump between renders)
+  // fixed star field (seeded so it doesn't jump between renders)
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const tints = ['#ffffff', '#ffffff', '#d7e6ff', '#ffe6c4', '#cfe0ff', '#ffd9a8'];
   const bg = svg.append('g').attr('aria-hidden', 'true');
-  for (let i = 0; i < 160; i++) bg.append('circle').attr('cx', (rnd() - .5) * W).attr('cy', (rnd() - .5) * H).attr('r', rnd() * 1.1 + .2)
-    .attr('fill', '#fff').attr('opacity', rnd() * .5 + .1).attr('class', i % 5 === 0 ? 'twinkle' : null).style('animation-delay', (rnd() * 4) + 's');
+  bg.append('ellipse').attr('rx', Math.max(W, H) * .09).attr('ry', Math.max(W, H) * .7).attr('fill', '#c9d3f0').attr('fill-opacity', .07)
+    .attr('filter', 'url(#mw)').attr('transform', 'rotate(-24)');
+  const count = Math.round(W * H / 2600);
+  for (let i = 0; i < count; i++) {
+    const big = rnd() < .12;
+    bg.append('circle').attr('cx', (rnd() - .5) * W).attr('cy', (rnd() - .5) * H).attr('r', big ? rnd() * .6 + .8 : rnd() * .5 + .25)
+      .attr('fill', tints[Math.floor(rnd() * tints.length)]).attr('opacity', rnd() * .5 + (big ? .4 : .15))
+      .attr('class', big && i % 3 === 0 ? 'twinkle' : null).style('animation-delay', (rnd() * 4) + 's');
+  }
 
   const g = svg.append('g');
   const zoom = d3.zoom().scaleExtent([.25, 4]).on('zoom', e => { zoomT = e.transform; g.attr('transform', e.transform); });
@@ -723,54 +772,78 @@ function drawGraph(){
   svg.call(zoom.transform, zoomT || d3.zoomIdentity);
   svg.on('click', e => { if (e.target === svg.node()) closePanel(); });
 
-  const link = g.append('g').selectAll('line').data(links).join('line')
-    .attr('stroke', d => d.kind === 'v' ? 'rgba(255,255,255,.4)' : d.kind === 'tc' ? 'rgba(41,151,255,.32)' : 'rgba(255,255,255,.2)')
-    .attr('stroke-width', d => d.kind === 'et' ? 1 : .8)
-    .attr('stroke-dasharray', d => d.kind === 'v' ? '3 4' : null);
+  const nebula = g.append('g').attr('aria-hidden', 'true').selectAll('circle').data(nodes.filter(n => n.type === 'cat')).join('circle')
+    .attr('r', 110).attr('fill', 'url(#neb)').style('pointer-events', 'none');
+
+  const linkG = g.append('g').attr('id', 'graph-links').style('display', showLines ? null : 'none');
+  const solid = links.filter(l => l.kind === 'et' || l.kind === 'ec');
+  const glow = linkG.append('g').attr('filter', 'url(#lglow)').selectAll('line').data(solid).join('line').attr('class', 'lnk')
+    .attr('stroke', '#9fb6ea').attr('stroke-opacity', .22).attr('stroke-width', 6).attr('stroke-linecap', 'round');
+  const link = linkG.append('g').selectAll('line').data(links).join('line').attr('class', 'lnk')
+    .attr('stroke', d => d.kind === 'v' ? '#9fc4f5' : d.kind === 'tc' ? '#8fa6d6' : '#b4c6f0')
+    .attr('stroke-opacity', d => d.kind === 'v' ? .75 : d.kind === 'tc' ? .3 : .72)
+    .attr('stroke-width', d => d.kind === 'tc' ? 1 : d.kind === 'v' ? 1.6 : 1.8)
+    .attr('stroke-dasharray', d => d.kind === 'v' ? '4 5' : d.kind === 'tc' ? '1 5' : null)
+    .attr('stroke-linecap', 'round');
 
   const node = g.append('g').selectAll('g').data(nodes).join('g').attr('class', 'node')
-    .attr('tabindex', 0).attr('role', 'button').attr('aria-label', d => ({exp:'경험', tag:'태그', cat:'전공 분야', virt:'가상 별'}[d.type]) + ' ' + d.label);
+    .attr('tabindex', 0).attr('role', 'button').attr('aria-label', d => ({exp:'경험', tag:'태그', cat:'전공 분야', virt:'관측 예정 별'}[d.type]) + ' ' + d.label);
   node.each(function(d){
     const s = d3.select(this);
-    s.append('circle').attr('class', 'ring').attr('r', d.type === 'cat' ? d.r + 11 : d.r + 5);
     if (d.type === 'exp') {
-      s.append('circle').attr('r', d.r).attr('fill', 'url(#starg)').attr('filter', 'url(#glow)');
-      s.append('circle').attr('r', d.r * .35).attr('fill', '#fff');
+      const [c, light] = starOf(d.ref), k = lightOf(d.ref), o = d.r + 7, q = 5;
+      s.append('circle').attr('r', d.r * 3.4).attr('fill', `url(#bl-${k})`);
+      s.append('circle').attr('r', d.r).attr('fill', c).style('filter', `drop-shadow(0 0 ${d.r * .7}px ${c})`);
+      s.append('circle').attr('r', d.r * .42).attr('fill', '#fff');
+      s.append('path').attr('class', 'ret').attr('d', `M${-o} ${-o + q}V${-o}H${-o + q}M${o - q} ${-o}H${o}V${-o + q}M${o} ${o - q}V${o}H${o - q}M${-o + q} ${o}H${-o}V${o - q}`);
+      if (d.ref.id === state.lastAddedId) {
+        s.append('line').attr('x1', -d.r - 12).attr('y1', -d.r - 10).attr('x2', d.r + 12).attr('y2', d.r + 10)
+          .attr('stroke', '#5ed38c').attr('stroke-width', 3).attr('stroke-dasharray', '5 3').attr('stroke-linecap', 'round');
+        s.append('text').attr('x', -d.r - 14).attr('y', -d.r - 10).attr('text-anchor', 'end').attr('font-size', 11).attr('font-weight', 600)
+          .attr('fill', '#7fe0a6').text('방금 기록한 별');
+      }
+      s.append('text').attr('class', 'lbl').attr('x', d.r + 7).attr('y', 4.5).attr('fill', light)
+        .attr('font-size', 13).attr('font-weight', 600).attr('display', labelVisible(d) ? null : 'none')
+        .text(d.label.length > 16 ? d.label.slice(0, 15) + '…' : d.label);
     } else if (d.type === 'tag') {
-      s.append('circle').attr('r', d.r).attr('fill', '#9fc6ff').attr('opacity', .9);
+      s.append('circle').attr('r', d.r + 6).attr('fill', 'transparent');
+      s.append('circle').attr('r', d.r).attr('fill', '#d5ddef').attr('fill-opacity', .85);
+      s.append('text').attr('class', 'lbl').attr('x', d.r + 4).attr('y', -3).attr('fill', '#b3bfd9').attr('fill-opacity', .8)
+        .attr('font-size', 10.5).attr('display', labelVisible(d) ? null : 'none').text(d.label);
     } else if (d.type === 'cat') {
-      s.append('circle').attr('r', d.r).attr('fill', 'rgba(41,151,255,.14)').attr('stroke', '#2997ff').attr('stroke-width', 1.5);
-      s.append('circle').attr('r', d.r + 6).attr('fill', 'none').attr('stroke', 'rgba(41,151,255,.25)');
+      s.append('circle').attr('r', d.r).attr('fill', 'transparent');
+      s.append('path').attr('class', 'ret').attr('d', 'M-34 -14V-20H-28M28 -20H34V-14M34 14V20H28M-28 20H-34V14');
+      s.append('text').attr('class', 'lbl').attr('y', 4).attr('text-anchor', 'middle').attr('fill', '#9fb4e0').attr('fill-opacity', .85)
+        .attr('font-size', 12.5).attr('font-weight', 600).attr('letter-spacing', '.24em').text(catLabel(d.label));
     } else {
-      s.append('circle').attr('r', d.r).attr('fill', 'rgba(255,255,255,.04)').attr('stroke', 'rgba(255,255,255,.75)').attr('stroke-width', 1.4).attr('stroke-dasharray', '3 3');
+      s.append('circle').attr('r', 12).attr('fill', 'transparent');
+      s.append('ellipse').attr('rx', 6).attr('ry', 10).attr('transform', 'rotate(25)').attr('fill', 'rgba(127,176,255,.08)')
+        .attr('stroke', '#7fb0ff').attr('stroke-width', 1.8);
+      s.append('path').attr('class', 'ret').attr('d', 'M-16 -11V-16H-11M11 -16H16V-11M16 11V16H11M-11 16H-16V11');
+      s.append('text').attr('class', 'lbl').attr('x', 14).attr('y', 4).attr('fill', '#9fc4f5').attr('font-size', 12)
+        .text(d.label + ' · 관측 예정');
     }
-    const short = d.label.length > 14 ? d.label.slice(0, 13) + '…' : d.label;
-    s.append('text').attr('class', 'lbl')
-      .attr('y', d.type === 'cat' ? d.r + 24 : d.r + 13).attr('text-anchor', 'middle')
-      .attr('fill', d.type === 'tag' ? '#cfe2ff' : d.type === 'virt' ? 'rgba(255,255,255,.7)' : '#fff')
-      .attr('font-size', d.type === 'cat' ? 13 : d.type === 'exp' ? 11.5 : 11)
-      .attr('font-weight', d.type === 'cat' ? 700 : d.type === 'exp' ? 600 : 500)
-      .attr('display', labelVisible(d) ? null : 'none')
-      .text(d.type === 'virt' ? short + ' (가상)' : short);
   });
 
   const adj = new Map(nodes.map(n => [n.id, new Set([n.id])]));
   for (const l of links) { adj.get(l.source)?.add(l.target); adj.get(l.target)?.add(l.source); }
   const focus = id => {
-    node.attr('opacity', d => !id || adj.get(id).has(d.id) ? 1 : .18);
-    link.attr('opacity', d => !id || d.source.id === id || d.target.id === id ? 1 : .08);
+    node.attr('opacity', d => !id || adj.get(id).has(d.id) ? 1 : .2);
+    linkG.selectAll('.lnk').attr('opacity', d => !id || d.source.id === id || d.target.id === id ? 1 : .08);
   };
   node.on('mouseenter', (e, d) => focus(d.id)).on('mouseleave', () => focus(panelNode))
     .on('click', (e, d) => { e.stopPropagation(); openPanel(d); focus(d.id); })
     .on('keydown', (e, d) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPanel(d); focus(d.id); } });
 
+  const ends = l => [l.source.x, l.source.y, l.target.x, l.target.y];
   sim = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink(links).id(d => d.id).distance(l => l.kind === 'tc' ? 95 : l.kind === 'v' ? 70 : 62).strength(l => l.kind === 'tc' ? .35 : .6))
-    .force('charge', d3.forceManyBody().strength(d => d.type === 'cat' ? -520 : d.type === 'exp' ? -230 : -130))
-    .force('collide', d3.forceCollide(d => d.r + (d.type === 'cat' ? 26 : 8)))
+    .force('link', d3.forceLink(links).id(d => d.id).distance(l => l.kind === 'tc' ? 95 : l.kind === 'v' ? 70 : 66).strength(l => l.kind === 'tc' ? .35 : .6))
+    .force('charge', d3.forceManyBody().strength(d => d.type === 'cat' ? -520 : d.type === 'exp' ? -240 : -120))
+    .force('collide', d3.forceCollide(d => d.type === 'cat' ? 52 : d.type === 'exp' ? d.r + 14 : d.type === 'virt' ? 18 : 9))
     .force('x', d3.forceX(0).strength(.045)).force('y', d3.forceY(state.experiences.length ? 0 : -H * .16).strength(.065))
     .on('tick', () => {
-      link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+      for (const sel of [link, glow]) sel.attr('x1', d => ends(d)[0]).attr('y1', d => ends(d)[1]).attr('x2', d => ends(d)[2]).attr('y2', d => ends(d)[3]);
+      nebula.attr('cx', d => d.x).attr('cy', d => d.y);
       node.attr('transform', d => `translate(${d.x},${d.y})`);
     })
     .on('end', () => nodes.forEach(n => posCache.set(n.id, { x: n.x, y: n.y })));
@@ -782,7 +855,7 @@ function drawGraph(){
     .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
   if (panelNode) { const pn = nodes.find(n => n.id === panelNode); if (pn) { openPanel(pn); focus(pn.id); } else closePanel(); }
 }
-function closePanel(){ panelNode = null; const p = $('#graph-panel'); if (p) p.hidden = true; if (typeof d3 !== 'undefined') { d3.selectAll('#graph-svg .node').classed('selected', false); d3.selectAll('#graph-svg .node').attr('opacity', 1); d3.selectAll('#graph-svg line').attr('opacity', 1); } }
+function closePanel(){ panelNode = null; const p = $('#graph-panel'); if (p) p.hidden = true; if (typeof d3 !== 'undefined') { d3.selectAll('#graph-svg .node').classed('selected', false); d3.selectAll('#graph-svg .node').attr('opacity', 1); d3.selectAll('#graph-svg .lnk').attr('opacity', 1); } }
 function openPanel(d){
   panelNode = d.id;
   if (typeof d3 !== 'undefined') d3.selectAll('#graph-svg .node').classed('selected', n => n.id === d.id);
@@ -790,7 +863,7 @@ function openPanel(d){
   let h = `<button class="icon-btn close" aria-label="닫기" id="gp-close">×</button>`;
   if (d.type === 'exp') {
     const e = d.ref;
-    h += `<div class="muted">${fmtDate(e.date)} · ${esc(e.type)}</div><h3>${esc(e.title)}</h3>
+    h += `<div class="muted"><i class="dot" style="background:${starOf(e)[0]};box-shadow:0 0 8px ${starOf(e)[0]}"></i>${esc(e.type)} · ${fmtDate(e.date)}</div><h3 style="color:${starOf(e)[1]}">${esc(e.title)}</h3>
       <div style="display:flex;gap:16px;flex-wrap:wrap">${miniStars('중요도', e.importance)}${miniStars('성장', e.growth)}</div>
       <p class="muted" style="display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden">${esc(e.body)}</p>
       <div class="chips">${e.tags.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>
@@ -806,13 +879,13 @@ function openPanel(d){
   } else if (d.type === 'cat') {
     const c = d.ref;
     const es = state.experiences.filter(e => catsForExp(e).includes(c.id));
-    h += `<div class="muted">전공 분야 · ${esc(c.group)}</div><h3>${esc(c.name)}</h3>
+    h += `<div class="muted">전공 분야 · ${esc(c.group)}</div><h3>${esc(catLabel(c.name))}</h3>
       <p class="muted">이 분야와 이어진 경험 ${es.length}개</p>
       <div>${es.slice(0, 8).map(e => `<button class="list-item" data-open-exp="${e.id}"><span>${esc(e.title)}</span><span class="muted">${e.date.slice(0, 7)}</span></button>`).join('')}</div>
       <div class="muted" style="font-size:12px">연결 키워드: ${c.keywords.map(esc).join(', ') || '없음'}</div>`;
   } else {
     const v = d.ref;
-    h += `<div class="muted">가상 별 · ${fmtDate(v.createdAt)}에 추가</div><h3>${esc(v.label)}</h3>
+    h += `<div class="muted">관측 예정 별 · ${fmtDate(v.createdAt)}에 추가</div><h3>${esc(v.label)}</h3>
       <p class="muted">앞으로 채우고 싶은 경험이에요. ‘${esc(v.label)}’ 태그가 달린 경험을 기록하면 자동으로 실제 별이 돼요.</p>
       ${v.links.length ? `<div class="chips">${v.links.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>` : ''}
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="gp-fill">이 경험 기록하기</button><button class="sky-btn" id="gp-del">삭제</button></div>`;
@@ -821,7 +894,7 @@ function openPanel(d){
   $('#gp-close').onclick = closePanel;
   const f = $('#gp-filter'); if (f) f.onclick = () => { recQ = d.label; go('records'); };
   const fill = $('#gp-fill'); if (fill) fill.onclick = () => openEditor(null, { tags: [d.ref.label] });
-  const del = $('#gp-del'); if (del) del.onclick = async () => { if (await ask(`가상 별 ‘${esc(d.ref.label)}’을(를) 삭제할까요?`, '삭제', true)) { commit(() => { state.virtuals = state.virtuals.filter(v => v.id !== d.ref.id); }); closePanel(); rerender(); } };
+  const del = $('#gp-del'); if (del) del.onclick = async () => { if (await ask(`관측 예정 별 ‘${esc(d.ref.label)}’을(를) 삭제할까요?`, '삭제', true)) { commit(() => { state.virtuals = state.virtuals.filter(v => v.id !== d.ref.id); }); closePanel(); rerender(); } };
 }
 
 /* ---------- virtual star form ---------- */
@@ -829,7 +902,7 @@ function openVirtualForm(label = ''){
   const tags = allTags().map(t => t.name);
   const sel = new Set();
   const layer = openModal(`
-    <div class="sheet-head"><h2>가상 별 추가</h2><button class="icon-btn" data-close aria-label="닫기">×</button></div>
+    <div class="sheet-head"><h2>관측 예정 별 추가</h2><button class="icon-btn" data-close aria-label="닫기">×</button></div>
     <div class="sheet-body" style="display:flex;flex-direction:column;gap:18px">
       <p style="color:var(--fg-2);font-size:15px">앞으로 채우고 싶은 경험이나 역량을 하늘에 미리 띄워 두세요. 같은 이름의 태그가 달린 경험을 기록하면 실제 별로 바뀌어요.</p>
       <label class="field"><span class="field-label">이름</span><input class="input" id="vf-label" placeholder="예: SQL, 통계 프로젝트" value="${esc(label)}"></label>
@@ -842,10 +915,10 @@ function openVirtualForm(label = ''){
   $('#vf-label', layer).focus();
   $('#vf-save', layer).onclick = () => {
     const l = $('#vf-label', layer).value.trim();
-    if (!l) { toast('가상 별의 이름을 적어 주세요.'); return; }
-    if (state.virtuals.some(v => !v.realizedAt && norm(v.label) === norm(l))) { toast(`‘${l}’ 가상 별은 이미 있어요.`); return; }
+    if (!l) { toast('관측 예정 별의 이름을 적어 주세요.'); return; }
+    if (state.virtuals.some(v => !v.realizedAt && norm(v.label) === norm(l))) { toast(`‘${l}’ 관측 예정 별은 이미 있어요.`); return; }
     if (commit(() => { state.virtuals.push({ id: uid(), label: l, links: [...sel], createdAt: today(), realizedAt: null, realizedBy: null }); })) {
-      closeModal(); toast(`가상 별 ‘${l}’을(를) 띄웠어요.`); rerender();
+      closeModal(); toast(`관측 예정 별 ‘${l}’을(를) 띄웠어요.`); rerender();
     }
   };
 }
@@ -871,7 +944,7 @@ function renderRecords(){
       : !list.length ? `<div class="empty"><h3>찾는 기록이 없어요.</h3><p>검색어나 유형을 바꿔 보세요.</p></div>`
       : `<div class="cards">${list.map(e => `
         <button class="rcard" data-open-exp="${e.id}">
-          <div class="meta"><span>${fmtDate(e.date)}</span><span>·</span><span>${esc(e.type)}</span>${e.attachments?.length ? `<span>· 첨부 ${e.attachments.length}</span>` : ''}</div>
+          <div class="meta"><i class="tdot" style="background:${starOf(e)[0]}"></i><span>${fmtDate(e.date)}</span><span>·</span><span>${esc(e.type)}</span>${e.attachments?.length ? `<span>· 첨부 ${e.attachments.length}</span>` : ''}</div>
           <h3>${esc(e.title)}</h3>
           <p class="ex">${esc(e.body || Object.values(e.guide || {}).join(' '))}</p>
           <div class="chips">${e.tags.slice(0, 5).map(t => `<span class="chip">${esc(t)}</span>`).join('')}${e.tags.length > 5 ? `<span class="chip ghost">+${e.tags.length - 5}</span>` : ''}</div>
@@ -1072,14 +1145,14 @@ function openEditor(id, preset = {}){
     let realized = [];
     const ok = commit(() => {
       if (src) Object.assign(src, ed);
-      else { ed.id = uid(); ed.createdAt = today(); state.experiences.push(ed); }
+      else { ed.id = uid(); ed.createdAt = today(); state.experiences.push(ed); state.lastAddedId = ed.id; }
       const saved = src || ed;
       for (const v of state.virtuals) if (!v.realizedAt && labelMatches(v.label, saved)) { v.realizedAt = today(); v.realizedBy = saved.id; realized.push(v.label); }
     });
     if (!ok) return;
     closeModal();
     toast(src ? '기록을 저장했어요.' : '새로운 별이 떴어요.');
-    realized.forEach(l => setTimeout(() => toast(`가상 별 ‘${l}’이(가) 실제 별이 되었어요.`), 600));
+    realized.forEach(l => setTimeout(() => toast(`관측 예정 별 ‘${l}’이(가) 실제 별이 되었어요.`), 600));
     if (!src && view !== 'graph' && view !== 'records') go('graph'); else rerender();
   };
 }
@@ -1237,14 +1310,14 @@ function renderGoal(){
             <span class="pill ${r.st}">${r.st === 'ok' ? '충분해요' : r.st === 'grow' ? '쌓는 중' : '필요해요'}</span>
             <div><div class="t">${r.st === 'need' ? `${esc(r.area)} 경험 필요` : r.st === 'grow' ? `${esc(r.area)} 경험을 조금 더` : esc(r.area)}</div>
               <div class="d">${r.es.length ? `관련 경험 ${r.es.length}개 · ${r.es.slice(0, 2).map(e => esc(e.title)).join(', ')}${r.es.length > 2 ? ' 외' : ''}` : '아직 관련된 기록이 없어요.'}</div></div>
-            ${r.st === 'ok' ? '' : hasVirt(r.area) ? '<span class="pill virt">가상 별 있음</span>' : `<button class="btn btn-secondary btn-sm" data-virt="${esc(r.area)}">가상 별로</button>`}
+            ${r.st === 'ok' ? '' : hasVirt(r.area) ? '<span class="pill virt">관측 예정 별 있음</span>' : `<button class="btn btn-secondary btn-sm" data-virt="${esc(r.area)}">관측 예정 별로</button>`}
           </div>`).join('')}</div>`}
       </div>
     </div>
     <div class="tile" style="display:flex;flex-direction:column;gap:12px">
       <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
-        <div><h2>가상 별</h2><p class="sub">앞으로 채우고 싶은 경험이에요. 같은 이름의 태그가 달린 경험을 기록하면 자동으로 실제 별이 돼요.</p></div>
-        <button class="btn btn-primary btn-sm" id="goal-add-virt">+ 가상 별 추가</button>
+        <div><h2>관측 예정 별</h2><p class="sub">앞으로 채우고 싶은 경험이에요. 같은 이름의 태그가 달린 경험을 기록하면 자동으로 실제 별이 돼요.</p></div>
+        <button class="btn btn-primary btn-sm" id="goal-add-virt">+ 관측 예정 별 추가</button>
       </div>
       <div class="vlist">${vs.length ? vs.map(v => `
         <div class="vrow"><span class="vdot ${v.realizedAt ? 'real' : ''}" aria-hidden="true"></span>
@@ -1252,7 +1325,7 @@ function renderGoal(){
           <span class="field-hint">${v.realizedAt ? `${fmtDate(v.realizedAt)}에 채워짐${expById(v.realizedBy) ? ` · ${esc(expById(v.realizedBy).title)}` : ''}` : `${fmtDate(v.createdAt)}에 추가${v.links.length ? ` · ${v.links.map(esc).join(', ')}와(과) 연결` : ''}`}</span>
           ${v.realizedAt ? '<span class="pill ok">채웠어요</span>' : `<button class="btn btn-secondary btn-sm" data-fill="${v.id}">기록하기</button>`}
           <button class="link" data-del-virt="${v.id}" style="font-size:13px;color:var(--fg-3)">삭제</button>
-        </div>`).join('') : '<p class="field-hint">아직 가상 별이 없어요. 위에서 ‘필요해요’로 나온 영역을 가상 별로 띄워 보세요.</p>'}</div>
+        </div>`).join('') : '<p class="field-hint">아직 관측 예정 별이 없어요. 위에서 ‘필요해요’로 나온 영역을 관측 예정 별로 띄워 보세요.</p>'}</div>
     </div>`;
   const saveGoal = () => commit(() => {});
   $('#goal-name').onchange = e => { g.name = e.target.value.trim(); saveGoal(); renderGoal(); };
@@ -1262,11 +1335,11 @@ function renderGoal(){
   $$('[data-add-area]').forEach(b => b.onclick = () => addArea(b.dataset.addArea));
   $$('[data-rm-area]').forEach(b => b.onclick = () => { g.areas = g.areas.filter(a => a !== b.dataset.rmArea); saveGoal(); renderGoal(); });
   $$('[data-virt]').forEach(b => b.onclick = () => { const l = b.dataset.virt; const links = allTags().filter(t => catsForTag(t.name).some(c => catsForTag(l).includes(c))).slice(0, 3).map(t => t.name);
-    if (commit(() => state.virtuals.push({ id: uid(), label: l, links, createdAt: today(), realizedAt: null, realizedBy: null }))) { toast(`가상 별 ‘${l}’을(를) 별자리에 띄웠어요.`); renderGoal(); } });
+    if (commit(() => state.virtuals.push({ id: uid(), label: l, links, createdAt: today(), realizedAt: null, realizedBy: null }))) { toast(`관측 예정 별 ‘${l}’을(를) 별자리에 띄웠어요.`); renderGoal(); } });
   $('#goal-add-virt').onclick = () => openVirtualForm();
   $$('[data-fill]').forEach(b => b.onclick = () => { const v = state.virtuals.find(x => x.id === b.dataset.fill); openEditor(null, { tags: [v.label] }); });
   $$('[data-del-virt]').forEach(b => b.onclick = async () => { const v = state.virtuals.find(x => x.id === b.dataset.delVirt);
-    if (await ask(`가상 별 ‘${esc(v.label)}’을(를) 삭제할까요?`, '삭제', true) && commit(() => { state.virtuals = state.virtuals.filter(x => x.id !== v.id); })) renderGoal(); });
+    if (await ask(`관측 예정 별 ‘${esc(v.label)}’을(를) 삭제할까요?`, '삭제', true) && commit(() => { state.virtuals = state.virtuals.filter(x => x.id !== v.id); })) renderGoal(); });
 }
 
 /* ================= SUMMARY ================= */
@@ -1399,7 +1472,7 @@ function renderMe(){
   $('#me-import').onchange = importData;
   $('#me-tour').onclick = () => startTour(false);
   $('#me-reset').onclick = async () => {
-    if (!await ask('모든 기록, 목표, 가상 별, 분야 설정을 지울까요? 되돌릴 수 없어요.', '모두 지우기', true)) return;
+    if (!await ask('모든 기록, 목표, 관측 예정 별, 분야 설정을 지울까요? 되돌릴 수 없어요.', '모두 지우기', true)) return;
     commit(() => { state = { ...emptyState(), tutorialDone: true }; }); posCache.clear(); toast('모든 기록을 지웠어요.'); go('graph');
   };
 }
@@ -1445,41 +1518,49 @@ async function importData(ev){
   } catch { toast('백업 파일을 읽지 못했어요. 이 서비스에서 내보낸 .json 파일인지 확인해 주세요.'); }
 }
 
-/* ================= ONBOARDING ================= */
-function openOnboarding(){
+/* ================= WELCOME ================= */
+// Asked before anything else: the sky is always "<name>의 별자리", so the name is required.
+function openWelcome(next){
+  const p = state.profile;
   const layer = openModal(`
-    <div class="sheet-head"><h2>당신의 하늘을 준비할게요.</h2><button class="icon-btn" data-close aria-label="닫기">×</button></div>
-    <div class="sheet-body" style="display:flex;flex-direction:column;gap:16px">
-      <p style="color:var(--fg-2);font-size:15px">전공을 알려 주면 경험이 전공 분야와 자동으로 이어져요. 나중에 ‘내 정보’에서 언제든 바꿀 수 있어요.</p>
-      <label class="field"><span class="field-label">이름 또는 닉네임</span><input class="input" id="ob-name" placeholder="예: 한별"></label>
-      <label class="field"><span class="field-label">주전공</span><input class="input" id="ob-m1" placeholder="예: 디지털경영"></label>
-      <label class="field"><span class="field-label">이중전공 · 부전공 (선택)</span><input class="input" id="ob-m2" placeholder="예: 산업경영공학"></label>
-      <p class="field-hint">전공을 ‘산업·경영·공학’처럼 더 잘게 나누고 싶다면 ‘내 정보’에서 나눌 수 있어요.</p>
+    <div class="sheet-body welcome">
+      <svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 9 9l6 4 5-9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="4" cy="18" r="2" fill="currentColor"/><circle cx="9" cy="9" r="2.4" fill="currentColor"/><circle cx="15" cy="13" r="1.7" fill="currentColor"/><circle cx="20" cy="4" r="2" fill="currentColor"/></svg>
+      <h2>너의 별자리는?</h2>
+      <p class="lead">지금까지의 경험을 별로 띄워 나만의 별자리를 그리는 곳이에요. 먼저 당신을 뭐라고 부르면 좋을까요?</p>
+      <label class="field"><span class="field-label">이름 또는 닉네임</span><input class="input" id="wl-name" maxlength="20" autocomplete="nickname" placeholder="예: 한별" value="${esc(p.name)}"></label>
+      <label class="field"><span class="field-label">주전공 (선택)</span><input class="input" id="wl-m1" placeholder="예: 디지털경영" value="${esc(p.majors.find(m => m.role === '주전공')?.name || '')}"></label>
+      <label class="field"><span class="field-label">이중전공 · 부전공 (선택)</span><input class="input" id="wl-m2" placeholder="예: 산업경영공학" value="${esc(p.majors.find(m => m.role === '이중전공')?.name || '')}"></label>
+      <p class="field-hint">전공을 적으면 경험이 전공 분야와 자동으로 이어져요. 나중에 ‘내 정보’에서 바꿀 수 있어요.</p>
     </div>
-    <div class="sheet-foot"><button class="btn btn-quiet" data-close>나중에 할게요</button><button class="btn btn-primary" id="ob-ok">시작하기</button></div>`, 'narrow');
-  $('#ob-name', layer).focus();
-  $('#ob-ok', layer).onclick = () => {
-    if (commit(() => applyProfile($('#ob-name', layer).value.trim(), $('#ob-m1', layer).value.trim(), $('#ob-m2', layer).value.trim()))) { closeModal(); go('graph'); toast('준비됐어요. 이제 첫 경험을 기록해 보세요.'); }
+    <div class="sheet-foot"><button class="btn btn-primary" id="wl-ok" disabled>시작하기</button></div>`, 'narrow', true);
+  const name = $('#wl-name', layer), ok = $('#wl-ok', layer);
+  const sync = () => { ok.disabled = !name.value.trim(); };
+  name.addEventListener('input', sync); sync(); name.focus();
+  const submit = () => {
+    if (!name.value.trim()) { name.focus(); return; }
+    if (commit(() => applyProfile(name.value.trim(), $('#wl-m1', layer).value.trim(), $('#wl-m2', layer).value.trim()))) { closeModal(); next(); }
   };
+  ok.onclick = submit;
+  $$('input', layer).forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) submit(); }));
 }
 
 /* ================= TOUR ================= */
 const TOUR = [
   { title:'너의 별자리는?', text:'지금까지 무엇을 해 왔는지, 나는 어떤 사람인지, 앞으로 무엇을 채워야 하는지 스스로 발견하는 경험 기록 서비스예요. 예시 학생 ‘한별’의 별자리로 먼저 둘러볼게요.' },
-  { view:'graph', target:'#graph', title:'경험이 별이 돼요', text:'기록한 경험은 밝은 별, 경험에서 나온 태그는 작은 푸른 별이 돼요. 같은 태그를 가진 경험끼리 자연스럽게 이어져 별자리가 생겨요. 별을 눌러 보거나 끌어서 움직일 수 있어요.' },
-  { view:'graph', target:'#graph-legend', title:'별의 크기와 모양', text:'삶에서의 중요도와 성장에 미친 영향이 클수록 별이 커져요. 고리 모양은 전공 분야, 점선 별은 앞으로 채우고 싶은 가상 별이에요.' },
+  { view:'graph', target:'#graph', title:'경험이 별이 돼요', text:'기록한 경험은 밝은 별, 경험에서 나온 태그는 작은 회색 별이 돼요. 같은 태그를 가진 경험끼리 별자리 선으로 이어져요. 별을 눌러 보거나 끌어서 움직일 수 있어요.' },
+  { view:'graph', target:'#graph-legend', title:'별빛 읽기', text:'별의 색은 활동 유형이에요. 중요도와 성장 별점이 클수록 별이 크고 밝아져요. 전공 분야는 별자리 이름으로, 앞으로 채우고 싶은 경험은 파란 타원의 관측 예정 별로 보여요.' },
   { view:'graph', target:'#btn-record', title:'언제든 기록하기', text:'정해진 양식 없이 자유롭게 쓰면 돼요. 내용에서 태그를 추천하고, 막힐 때는 생각을 돕는 질문을 건네요. 어떤 태그를 달지는 당신이 정해요.' },
   { view:'records', target:'#records-grid', title:'모든 기록을 한곳에', text:'쌓인 경험을 검색하고, 중요도나 성장 순으로 다시 볼 수 있어요.' },
   { view:'ability', target:'#ability-main', title:'능력치', text:'경험의 개수가 아니라 실제로 성장했다고 느낀 정도를 더해 계산해요. 자주 한 것과 크게 성장한 것이 다를 수도 있어요.' },
   { view:'timeline', target:'#timeline-chart-wrap', title:'타임라인', text:'어느 시기에 어떤 활동을 집중적으로 했는지, 어떤 분야가 언제부터 늘었는지 보여 줘요.' },
-  { view:'goal', target:'#goal-results', title:'목표와 가상 별', text:'목표와 필요한 영역을 직접 적으면 지금의 경험과 비교해 줘요. 비어 있는 영역은 가상 별로 띄우고, 실제 경험을 기록하면 자동으로 채워져요.' },
+  { view:'goal', target:'#goal-results', title:'목표와 관측 예정 별', text:'목표와 필요한 영역을 직접 적으면 지금의 경험과 비교해 줘요. 비어 있는 영역은 관측 예정 별로 띄우고, 실제 경험을 기록하면 자동으로 채워져요.' },
   { view:'summary', target:'#analysis-card', title:'분석 결과', text:'경험이 쌓이면 활동 요약과 함께 반복되는 흐름을 짧게 정리해 드려요. 당신을 규정하지 않고, 기록에서 보이는 패턴만 설명해요.' },
   { title:'이제 당신 차례예요.', text:'예시 데이터를 지우고 빈 하늘에서 시작할게요. 첫 번째 별은 무엇이 될까요?', last:true },
 ];
 let tourI = 0, tourFresh = false;
 function startTour(fresh){
   tourFresh = fresh;
-  realState = fresh ? null : state;
+  realState = state;
   demo = true; state = makeSample(); posCache.clear(); zoomT = null; panelNode = null;
   closeModal(); tourI = 0;
   document.documentElement.classList.add('touring');
@@ -1535,21 +1616,18 @@ function endTour(){
   state = realState || emptyState(); realState = null;
   state.tutorialDone = true; save();
   go('graph');
-  if (tourFresh && !state.profile.name && !state.categories.length) openOnboarding();
 }
 
 /* ================= BOOT ================= */
 if (!storageOK) $('#storage-banner').hidden = false;
 const saved = load();
-if (saved && saved.tutorialDone) {
-  state = { ...emptyState(), ...saved };
-  const v = recall('view'); go(RENDER[v] ? v : 'graph');
-} else {
-  if (saved) state = { ...emptyState(), ...saved };
-  go('graph');
-  startTour(!saved || !saved.experiences?.length);
-  if (saved && saved.experiences?.length) realState = { ...emptyState(), ...saved };
-}
+if (saved) state = { ...emptyState(), ...saved };
+const begin = () => {
+  if (!state.tutorialDone) startTour(!state.experiences.length);
+  else { const v = recall('view'); go(RENDER[v] ? v : 'graph'); }
+};
+go('graph');
+if (!state.profile.name) openWelcome(begin); else begin();
 let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (view === 'graph') drawGraph(); }, 200); });
 })();
 </script>

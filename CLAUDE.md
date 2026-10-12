@@ -11,6 +11,7 @@ The project is **너의 별자리는?**, a Korean-language experience-graph web 
 - The same page is also published as a claude.ai Artifact. When publishing it there, strip the leading `<!doctype html>…<body>` wrapper and the trailing `</body></html>`, because the Artifact tool adds its own skeleton.
 - State lives in `localStorage` under the key `byeoljari.v1`. The tutorial runs on in-memory sample data (`makeSample`) and never persists it.
 - "AI" features (tag suggestions, writing-guide questions, analysis comment) are rule-based: see `DICT`, `DOMAIN_HINTS`, `ASPECTS`/`TAG_Q` and `analysisText`.
+- The graph uses design E from the design canvas: experience stars are coloured by activity type (`STARLIGHT`/`TYPE_LIGHT`), majors show as constellation names, virtual stars are called 관측 예정 별. On first open `openWelcome` asks for a required name before the tutorial.
 - UI copy is Korean, in a polite 해요체 tone. The visual direction is based on Apple's website.
 
 Adjusting File
