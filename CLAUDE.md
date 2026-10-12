@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-The project is **너의 별자리는?**, a Korean-language experience-graph web app prototype for university students (see README.md for the feature list).
+The project is **MYkrokosmos** (formerly 너의 별자리는?), a Korean-language experience-graph web app prototype for university students (see README.md for the feature list).
 
 - `byeoljari/index.html` is the whole app: one self-contained HTML file with inline CSS and vanilla JS. The only external dependencies are d3 7.8.5 (cdnjs) and the Noto Sans KR Google Font.
 - There is no build step, package manifest or test suite. To run it, open `byeoljari/index.html` in a browser.

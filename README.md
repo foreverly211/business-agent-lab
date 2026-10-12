@@ -2,7 +2,7 @@
 
 ## what I want to build with agents
 
-**너의 별자리는?** — 대학생이 자신의 경험을 기록하고, 경험과 태그가 이어진 별자리(Experience Graph)를 보며
+**MYkrokosmos** (My + Mikrokosmos, 나만의 작은 우주) — 대학생이 자신의 경험을 기록하고, 경험과 태그가 이어진 별자리(Experience Graph)를 보며
 "내가 무엇을 해 왔는지, 나는 어떤 사람인지, 앞으로 무엇을 채워야 하는지"를 스스로 발견하는 서비스 프로토타입.
 
 - 앱: [`byeoljari/index.html`](byeoljari/index.html) — 파일 하나로 동작하는 웹 앱. 브라우저에서 바로 열면 됩니다.
