@@ -373,7 +373,10 @@ textarea.input{width:100%;resize:vertical;line-height:1.6;font-size:16px}
 .view-exit{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:16px;display:none;align-items:center;gap:10px}
 .sky.viewing .view-exit{display:flex}
 .view-exit .hint{font-size:12px;color:rgba(245,245,247,.55)}
+.view-exit .sky-btn{white-space:nowrap}
 html.viewing-mode,html.viewing-mode body{overflow:hidden}
+.shoot{stroke:#fff;stroke-width:1.6;stroke-linecap:round;opacity:0;transform-box:fill-box;transform-origin:left;animation:shoot 1.6s ease-out forwards;filter:drop-shadow(0 0 4px rgba(200,220,255,.9))}
+@keyframes shoot{0%{opacity:0;transform:translate(0,0)}12%{opacity:.95}100%{opacity:0;transform:translate(340px,145px)}}
 html.touring,html.touring body{overflow:hidden}
 html{scrollbar-gutter:stable}
 .tour-spot{position:fixed;border-radius:20px;box-shadow:0 0 0 9999px rgba(0,0,0,.58);transition:all .35s cubic-bezier(.2,.8,.2,1);pointer-events:none}
@@ -814,18 +817,24 @@ function drawGraph(){
   bg.append('ellipse').attr('rx', Math.max(W, H) * .09).attr('ry', Math.max(W, H) * .7).attr('fill', '#c9d3f0').attr('fill-opacity', .07)
     .attr('filter', 'url(#mw)').attr('transform', 'rotate(-24)');
   const count = Math.round(W * H / 2600);
-  for (let i = 0; i < count; i++) {
-    const big = rnd() < .12;
-    bg.append('circle').attr('cx', (rnd() - .5) * W).attr('cy', (rnd() - .5) * H).attr('r', big ? rnd() * .6 + .8 : rnd() * .5 + .25)
-      .attr('fill', tints[Math.floor(rnd() * tints.length)]).attr('opacity', rnd() * .5 + (big ? .4 : .15))
-      .attr('class', big && i % 3 === 0 ? 'twinkle' : null).style('animation-delay', (rnd() * 4) + 's');
-  }
+  skyLayers = [{ speed: 5, share: .65, near: false }, { speed: 12, share: .35, near: true }].map(L => {
+    const layer = bg.append('g'), stars = [];
+    for (let i = 0; i < count * L.share; i++) {
+      const big = L.near && rnd() < .3;
+      stars.push({ x: (rnd() - .5) * W, y: (rnd() - .5) * H, r: big ? rnd() * .6 + .8 : rnd() * .5 + (L.near ? .45 : .25),
+        fill: tints[Math.floor(rnd() * tints.length)], op: rnd() * .5 + (big ? .4 : .15), tw: big && i % 3 === 0, delay: rnd() * 4 });
+    }
+    for (const dx of [0, -W]) for (const st of stars) layer.append('circle').attr('cx', st.x + dx).attr('cy', st.y).attr('r', st.r)
+      .attr('fill', st.fill).attr('opacity', st.op).attr('class', st.tw ? 'twinkle' : null).style('animation-delay', st.delay + 's');
+    return { el: layer.node(), speed: L.speed, W };
+  });
 
-  const g = svg.append('g');
+  const g = svg.append('g').attr('id', 'drift').append('g');
   const zoom = d3.zoom().scaleExtent([.25, 4]).on('zoom', e => { zoomT = e.transform; g.attr('transform', e.transform); });
   svg.call(zoom).on('dblclick.zoom', null);
   svg.call(zoom.transform, zoomT || d3.zoomIdentity);
   svg.on('click', e => { if (e.target === svg.node()) closePanel(); });
+  svg.append('g').attr('id', 'shooting').attr('aria-hidden', 'true');
 
   const nebula = g.append('g').attr('aria-hidden', 'true').selectAll('circle').data(nodes.filter(n => n.type === 'cat')).join('circle')
     .attr('r', 110).attr('fill', 'url(#neb)').style('pointer-events', 'none');
@@ -917,8 +926,7 @@ function enterViewing(){
   wrap.classList.add('viewing');
   document.documentElement.classList.add('viewing-mode');
   zoomT = null;
-  if (wrap.requestFullscreen) wrap.requestFullscreen().catch(() => {});
-  setTimeout(drawGraph, 80);
+  setTimeout(() => { drawGraph(); startDrift(); }, 80);
   $('#g-view-exit').focus();
 }
 function exitViewing(){
@@ -926,11 +934,41 @@ function exitViewing(){
   if (!wrap || !wrap.classList.contains('viewing')) return;
   wrap.classList.remove('viewing');
   document.documentElement.classList.remove('viewing-mode');
-  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  stopDrift();
   zoomT = null;
   setTimeout(drawGraph, 80);
 }
-document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) exitViewing(); });
+// 감상 모드 연출: star layers drift at two speeds, the constellation sways slowly, now and then a shooting star.
+let skyLayers = [], driftRAF = null, shootTimer = null;
+function startDrift(){
+  stopDrift();
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const t0 = performance.now();
+  const step = now => {
+    const t = (now - t0) / 1000;
+    for (const L of skyLayers) L.el.setAttribute('transform', `translate(${(t * L.speed) % L.W},0)`);
+    const d = $('#drift'); if (d) d.setAttribute('transform', `translate(${(Math.sin(t / 19) * 36).toFixed(2)},${(Math.sin(t / 27) * 22).toFixed(2)})`);
+    driftRAF = requestAnimationFrame(step);
+  };
+  driftRAF = requestAnimationFrame(step);
+  const shoot = () => {
+    const host = $('#shooting'), wrap = $('#graph');
+    if (host && wrap) {
+      const W = wrap.clientWidth, H = wrap.clientHeight, x = (Math.random() - .7) * W, y = (Math.random() - .9) * H / 2, len = 90 + Math.random() * 80;
+      const ns = 'http://www.w3.org/2000/svg', el = document.createElementNS(ns, 'line');
+      el.setAttribute('x1', x); el.setAttribute('y1', y); el.setAttribute('x2', x - len); el.setAttribute('y2', y - len * .42);
+      el.setAttribute('class', 'shoot');
+      host.appendChild(el); setTimeout(() => el.remove(), 1700);
+    }
+    shootTimer = setTimeout(shoot, 5000 + Math.random() * 7000);
+  };
+  shootTimer = setTimeout(shoot, 2500);
+}
+function stopDrift(){
+  cancelAnimationFrame(driftRAF); driftRAF = null; clearTimeout(shootTimer); shootTimer = null;
+  for (const L of skyLayers) L.el.removeAttribute('transform');
+  const d = $('#drift'); if (d) d.removeAttribute('transform');
+}
 function closePanel(){ panelNode = null; const p = $('#graph-panel'); if (p) p.hidden = true; if (typeof d3 !== 'undefined') { d3.selectAll('#graph-svg .node').classed('selected', false); if (graphFocus) graphFocus(null); } }
 function openPanel(d){
   panelNode = d.id;
