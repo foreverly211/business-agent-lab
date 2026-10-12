@@ -1,0 +1,1535 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<title>너의 별자리는?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: Apple-style product site — translucent global nav, big headline per view, soft grey tiles; the constellation lives in one deep night-sky tile. */
+:root{
+  --bg:#ffffff; --bg-alt:#f5f5f7; --tile:#f5f5f7; --card:#ffffff;
+  --fg:#1d1d1f; --fg-2:#6e6e73; --fg-3:#86868b; --line:#d2d2d7; --chip:#e8e8ed;
+  --accent:#0071e3; --accent-fg:#ffffff; --link:#0066cc;
+  --nav:rgba(251,251,253,.82); --scrim:rgba(0,0,0,.42);
+  --ok:#1d7d3a; --ok-bg:#e3f4e8; --grow:#a15c00; --grow-bg:#fdf0dc; --need:#c4122e; --need-bg:#fde7ea;
+  --star-on:#ff9f0a; --star-off:#d2d2d7;
+  --sky:#04060c; --sky-2:#0b1226; --sky-fg:#f5f5f7; --sky-dim:rgba(245,245,247,.55);
+  --exp:#ffe3a3; --tag:#9fc6ff; --cat:#2997ff; --virt:rgba(255,255,255,.75);
+  --s1:#0a84ff; --s2:#ff9f0a; --s3:#28a745; --s4:#ff375f; --s5:#8e5cf6;
+  --f-sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  --r-tile:28px; --r-card:18px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#000000; --bg-alt:#0d0d0f; --tile:#161618; --card:#1d1d1f;
+  --fg:#f5f5f7; --fg-2:#a1a1a6; --fg-3:#86868b; --line:#3a3a3c; --chip:#2c2c2e;
+  --accent:#0a84ff; --accent-fg:#ffffff; --link:#2997ff;
+  --nav:rgba(22,22,23,.82); --scrim:rgba(0,0,0,.6);
+  --ok:#30d158; --ok-bg:#0f2a17; --grow:#ffb340; --grow-bg:#2e2108; --need:#ff6961; --need-bg:#3a1214;
+  --star-on:#ffb340; --star-off:#48484a; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#000000; --bg-alt:#0d0d0f; --tile:#161618; --card:#1d1d1f;
+  --fg:#f5f5f7; --fg-2:#a1a1a6; --fg-3:#86868b; --line:#3a3a3c; --chip:#2c2c2e;
+  --accent:#0a84ff; --accent-fg:#ffffff; --link:#2997ff;
+  --nav:rgba(22,22,23,.82); --scrim:rgba(0,0,0,.6);
+  --ok:#30d158; --ok-bg:#0f2a17; --grow:#ffb340; --grow-bg:#2e2108; --need:#ff6961; --need-bg:#3a1214;
+  --star-on:#ffb340; --star-off:#48484a; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--f-sans);font-size:17px;line-height:1.47;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0;letter-spacing:-.02em}
+p{margin:0}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--nav);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+.nav-inner{max-width:1080px;margin-inline:auto;display:flex;align-items:center;gap:8px;height:52px;padding-inline:16px}
+.brand{font-weight:700;font-size:17px;white-space:nowrap;display:flex;align-items:center;gap:8px;background:none;border:0;padding:0}
+.brand svg{width:20px;height:20px}
+.nav-links{display:flex;gap:2px;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none;min-width:0}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links button{background:none;border:0;padding:6px 12px;font-size:13px;color:var(--fg-2);border-radius:999px;white-space:nowrap}
+.nav-links button:hover{color:var(--fg)}
+.nav-links button[aria-current="page"]{color:var(--fg);background:var(--chip)}
+.nav-cta{white-space:nowrap}
+
+main{padding-inline:16px;padding-block:0 96px}
+.wrap{max-width:1080px;margin-inline:auto}
+.view{display:flex;flex-direction:column;gap:28px}
+.hero{padding-block:56px 8px;display:flex;flex-direction:column;gap:10px}
+.eyebrow{font-size:14px;font-weight:600;color:var(--fg-2);letter-spacing:0}
+.hero h1{font-size:clamp(34px,5.4vw,56px);font-weight:800;line-height:1.07;letter-spacing:-.035em}
+.hero p.lead{font-size:clamp(17px,2vw,21px);color:var(--fg-2);max-width:40em;line-height:1.38}
+.hero-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:8px}
+
+.tile{background:var(--tile);border-radius:var(--r-tile);padding:clamp(20px,3.4vw,40px);min-width:0}
+.tile h2{font-size:clamp(22px,2.6vw,28px);font-weight:700}
+.tile .sub{color:var(--fg-2);font-size:15px;margin-top:4px}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;border:0;padding:9px 18px;font-size:15px;font-weight:500;line-height:1.2;transition:background .15s,opacity .15s}
+.btn-primary{background:var(--accent);color:var(--accent-fg)}
+.btn-primary:hover{background:color-mix(in srgb,var(--accent) 88%,#000)}
+.btn-secondary{background:transparent;color:var(--link);box-shadow:inset 0 0 0 1px var(--link)}
+.btn-secondary:hover{background:color-mix(in srgb,var(--link) 8%,transparent)}
+.btn-quiet{background:var(--chip);color:var(--fg)}
+.btn-danger{background:transparent;color:var(--need)}
+.btn-sm{padding:6px 14px;font-size:13px}
+.btn[disabled]{opacity:.4;cursor:default}
+.link{background:none;border:0;padding:0;color:var(--link);font-size:inherit}
+.link:hover{text-decoration:underline}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:4px 11px;font-size:13px;background:var(--chip);color:var(--fg);border:1px solid transparent;line-height:1.4;white-space:nowrap}
+button.chip:hover{border-color:var(--line)}
+.chip.on{background:var(--accent);color:var(--accent-fg)}
+.chip.ghost{background:transparent;border:1px dashed var(--line);color:var(--fg-2)}
+.chip .x{opacity:.7;font-size:15px;line-height:1;margin-left:2px}
+.chip small{opacity:.7;font-size:11px}
+
+/* sky */
+.sky{position:relative;background:radial-gradient(120% 90% at 50% 0%,var(--sky-2),var(--sky) 70%);border-radius:var(--r-tile);height:clamp(460px,72vh,780px);overflow:hidden;color:var(--sky-fg);color-scheme:dark}
+.sky svg{width:100%;height:100%;display:block;cursor:grab}
+.sky svg:active{cursor:grabbing}
+.sky-tools{position:absolute;top:16px;left:16px;right:16px;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none}
+.sky-tools>*{pointer-events:auto}
+.sky-btn{background:rgba(255,255,255,.1);color:var(--sky-fg);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);border-radius:999px;padding:7px 14px;font-size:13px}
+.sky-btn:hover{background:rgba(255,255,255,.18)}
+.sky-btn[aria-pressed="true"]{background:rgba(255,255,255,.9);color:#000}
+.legend{position:absolute;left:16px;bottom:16px;display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--sky-dim);background:rgba(0,0,0,.35);padding:8px 12px;border-radius:12px;backdrop-filter:blur(8px)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg{width:10px;height:10px;border-radius:50%;display:inline-block}
+.sky-panel{position:absolute;top:64px;right:16px;bottom:16px;width:min(340px,calc(100% - 32px));background:rgba(20,22,30,.78);backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:20px;overflow:auto;display:flex;flex-direction:column;gap:14px;font-size:14px}
+.sky-panel h3{font-size:20px}
+.sky-panel .muted{color:var(--sky-dim)}
+.sky-panel .chip{background:rgba(255,255,255,.12);color:var(--sky-fg)}
+.sky-panel .list-item{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid rgba(255,255,255,.08);background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;width:100%;font-size:14px}
+.sky-panel .list-item:hover{color:#fff}
+.sky-panel .close{position:absolute;top:12px;right:12px}
+.sky-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:24px}
+.sky-empty>div{pointer-events:auto;text-align:center;max-width:420px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.sky-empty h3{font-size:28px;font-weight:700}
+.sky-empty p{color:var(--sky-dim)}
+.node{cursor:pointer}
+.node text{pointer-events:none;paint-order:stroke;stroke:rgba(4,6,12,.85);stroke-width:3px}
+.twinkle{animation:tw 4s ease-in-out infinite}
+@keyframes tw{50%{opacity:.15}}
+@media (prefers-reduced-motion: reduce){.twinkle{animation:none}}
+
+/* records */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.input,.select,textarea.input{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:15px;min-width:0}
+.input:focus,.select:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.search{flex:1 1 220px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px}
+.rcard{background:var(--tile);border-radius:var(--r-card);padding:22px;display:flex;flex-direction:column;gap:10px;text-align:left;border:0;color:inherit;min-width:0;transition:transform .2s}
+.rcard:hover{transform:translateY(-2px)}
+.rcard .meta{font-size:12px;color:var(--fg-2);display:flex;gap:6px;flex-wrap:wrap}
+.rcard h3{font-size:19px;font-weight:700;line-height:1.3}
+.rcard .ex{font-size:14px;color:var(--fg-2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rcard .rates{display:flex;gap:14px;font-size:12px;color:var(--fg-2);margin-top:auto;flex-wrap:wrap}
+.mini-stars{display:inline-flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums}
+.mini-stars b{color:var(--star-on);font-weight:600}
+.empty{text-align:center;padding:56px 20px;color:var(--fg-2);display:flex;flex-direction:column;gap:12px;align-items:center}
+.empty h3{color:var(--fg);font-size:22px}
+
+/* stars input */
+.stars{display:inline-flex;align-items:center;gap:2px;user-select:none}
+.star{position:relative;width:28px;height:28px;display:inline-block;cursor:pointer}
+.star svg{width:28px;height:28px;display:block}
+.star .s-bg{fill:var(--star-off)}
+.star .s-fill{position:absolute;inset:0 auto 0 0;overflow:hidden}
+.star .s-fill svg path{fill:var(--star-on)}
+.stars-val{margin-left:8px;font-weight:600;font-variant-numeric:tabular-nums;min-width:2.2em}
+.stars.ro .star{width:16px;height:16px;cursor:default}
+.stars.ro .star svg{width:16px;height:16px}
+.stars.ro .stars-val{font-size:13px;margin-left:4px}
+
+/* modal */
+.layer{position:fixed;inset:0;z-index:60;background:var(--scrim);display:flex;align-items:center;justify-content:center;padding:16px;padding-top:max(16px,env(safe-area-inset-top,0px));padding-bottom:max(16px,env(safe-area-inset-bottom,0px))}
+.sheet{background:var(--bg);color:var(--fg);border-radius:24px;width:min(1000px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.sheet.narrow{width:min(520px,100%)}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;padding:20px 24px 12px;gap:12px}
+.sheet-head h2{font-size:24px;font-weight:700}
+.sheet-body{padding:8px 24px 24px;overflow:auto;min-height:0}
+.sheet-foot{display:flex;gap:10px;justify-content:flex-end;align-items:center;padding:14px 24px;border-top:1px solid var(--line);flex-wrap:wrap}
+.sheet-foot .spacer{flex:1}
+.icon-btn{background:var(--chip);border:0;width:32px;height:32px;border-radius:50%;font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;color:var(--fg-2);flex:none}
+.editor{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px}
+@media (max-width:820px){.editor{grid-template-columns:1fr}}
+.ed-main,.ed-side{display:flex;flex-direction:column;gap:18px;min-width:0}
+.ed-title{font-size:26px;font-weight:700;border:0;border-bottom:1px solid var(--line);padding:6px 0;background:transparent;width:100%;letter-spacing:-.02em}
+.ed-title:focus{outline:none;border-color:var(--accent)}
+.ed-row{display:flex;gap:12px;flex-wrap:wrap}
+.ed-row label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--fg-2);flex:1 1 160px}
+textarea.input{width:100%;resize:vertical;line-height:1.6;font-size:16px}
+#ed-body{min-height:180px}
+.guide-box{background:var(--tile);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.guide-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline;font-weight:600;font-size:15px}
+.guide-head small{font-weight:400;color:var(--fg-2);font-size:13px}
+.guide-field label{font-size:13px;color:var(--fg-2);display:block;margin-bottom:4px}
+.guide-field textarea{min-height:64px;font-size:15px}
+.ask-card{background:var(--card);border-radius:12px;padding:12px 14px;font-size:14px;display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid var(--line);text-align:left;width:100%}
+.ask-card:hover{border-color:var(--accent)}
+.ask-card span.add{color:var(--link);font-size:13px;white-space:nowrap}
+.field{display:flex;flex-direction:column;gap:8px}
+.field-label{font-size:13px;font-weight:600;color:var(--fg-2)}
+.field-hint{font-size:12px;color:var(--fg-3)}
+.file-drop{border:1px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--link);font-size:14px;cursor:pointer;background:var(--card)}
+.file-drop:hover{border-color:var(--accent)}
+.att-list{display:flex;flex-wrap:wrap;gap:10px}
+.att{position:relative;width:88px;height:88px;border-radius:12px;overflow:hidden;background:var(--chip);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--fg-2);text-align:center;padding:6px;word-break:break-all}
+.att img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.att .rm{position:absolute;top:4px;right:4px;width:22px;height:22px;font-size:13px;z-index:1}
+.side-card{background:var(--tile);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.tag-input{display:flex;gap:8px}
+.tag-input .input{flex:1}
+
+/* detail */
+.detail{display:flex;flex-direction:column;gap:20px}
+.detail .body{white-space:pre-wrap;font-size:16px;line-height:1.7}
+.detail .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.detail .kv>div{background:var(--tile);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--fg-2)}
+.qa{border-left:2px solid var(--line);padding-left:14px}
+.qa b{display:block;font-size:13px;color:var(--fg-2);font-weight:600;margin-bottom:2px}
+
+/* ability */
+.ability{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.ability{grid-template-columns:1fr}}
+.radar text{fill:var(--fg);font-size:12px}
+.radar .grid{fill:none;stroke:var(--line)}
+.radar .area{fill:color-mix(in srgb,var(--accent) 22%,transparent);stroke:var(--accent);stroke-width:2}
+.radar .dot{fill:var(--accent)}
+.seg{display:inline-flex;background:var(--chip);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;border-radius:999px;padding:5px 14px;font-size:13px;color:var(--fg-2)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.stat-row{display:grid;grid-template-columns:minmax(80px,8em) 1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.stat-row:first-child{border-top:0}
+.stat-name{font-weight:600;font-size:15px;overflow-wrap:anywhere}
+.stat-sub{font-size:12px;color:var(--fg-2);grid-column:2/4}
+.bar{height:8px;background:var(--chip);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.stat-val{font-variant-numeric:tabular-nums;font-weight:600;font-size:15px}
+.insight{font-size:clamp(19px,2.2vw,24px);font-weight:600;line-height:1.4;letter-spacing:-.02em}
+.insight em{font-style:normal;color:var(--link)}
+
+/* timeline */
+.chart-wrap{overflow-x:auto}
+.tl-chart{min-width:640px;width:100%;display:block}
+.tl-chart text{fill:var(--fg-2);font-size:11px}
+.tl-chart .band{fill:var(--card)}
+.tl-chart .axis{stroke:var(--line)}
+.tl-chart .grid{stroke:var(--line);stroke-dasharray:2 4}
+.tl-chart .lbl{font-size:12px;font-weight:600}
+.firsts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:20px}
+.firsts>div{background:var(--card);border-radius:14px;padding:14px;font-size:13px;color:var(--fg-2);display:flex;flex-direction:column;gap:2px}
+.firsts b{color:var(--fg);font-size:15px}
+.sems{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.sem{flex:0 0 min(280px,85%);scroll-snap-align:start;background:var(--tile);border-radius:var(--r-card);padding:20px;display:flex;flex-direction:column;gap:10px}
+.sem h3{font-size:19px}
+.sem .cnt{font-size:13px;color:var(--fg-2)}
+.sem ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.sem li button{background:none;border:0;padding:4px 0;text-align:left;font-size:14px;color:var(--fg);width:100%}
+.sem li button:hover{color:var(--link)}
+.sem li small{color:var(--fg-3);font-variant-numeric:tabular-nums;margin-right:6px}
+.sem.empty-sem{opacity:.55}
+
+/* goal */
+.goal-form{display:flex;flex-direction:column;gap:16px}
+.goal-name{font-size:clamp(24px,3vw,32px);font-weight:700;border:0;border-bottom:1px solid var(--line);background:transparent;padding:6px 0;width:100%;letter-spacing:-.02em}
+.goal-name:focus{outline:none;border-color:var(--accent)}
+.gap-list{display:flex;flex-direction:column}
+.gap-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:16px 0;border-top:1px solid var(--line)}
+.gap-row:first-child{border-top:0}
+.gap-row .t{font-weight:600;font-size:17px}
+.gap-row .d{font-size:13px;color:var(--fg-2)}
+.pill{font-size:12px;font-weight:600;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.grow{background:var(--grow-bg);color:var(--grow)}
+.pill.need{background:var(--need-bg);color:var(--need)}
+.pill.virt{background:var(--chip);color:var(--fg-2)}
+.cover{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.cover svg{flex:none}
+.vlist{display:flex;flex-direction:column}
+.vrow{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.vrow:first-child{border-top:0}
+.vrow .nm{font-weight:600;flex:1;min-width:120px}
+.vdot{width:14px;height:14px;border-radius:50%;border:1.5px dashed var(--fg-2);flex:none}
+.vdot.real{border-style:solid;background:var(--star-on);border-color:var(--star-on)}
+
+/* summary */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:16px}
+.num-tile{background:var(--tile);border-radius:var(--r-card);padding:22px;display:flex;flex-direction:column;gap:4px}
+.num-tile .n{font-size:44px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.1}
+.num-tile .n small{font-size:18px;font-weight:600;margin-left:2px}
+.num-tile .l{font-size:14px;color:var(--fg-2)}
+.rank{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column}
+.rank li{display:flex;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.rank li:first-child{border-top:0}
+.rank .no{font-weight:800;color:var(--fg-3);font-variant-numeric:tabular-nums;width:1.2em}
+.rank button{background:none;border:0;padding:0;text-align:left;font-weight:600;font-size:16px;flex:1;color:var(--fg)}
+.rank button:hover{color:var(--link)}
+.cloud{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;margin-top:16px}
+.cloud span{font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.cloud small{font-size:12px;color:var(--fg-3);font-weight:500;margin-left:3px}
+.analysis{background:var(--sky);color:var(--sky-fg);border-radius:var(--r-tile);padding:clamp(28px,5vw,64px);display:flex;flex-direction:column;gap:18px;background-image:radial-gradient(90% 120% at 100% 0%,var(--sky-2),transparent 60%)}
+.analysis .eyebrow{color:var(--sky-dim)}
+.analysis p.txt{font-size:clamp(20px,2.6vw,30px);font-weight:600;line-height:1.45;letter-spacing:-.025em;max-width:30em}
+.analysis p.txt mark{background:none;color:var(--exp)}
+.analysis .note{font-size:13px;color:var(--sky-dim)}
+
+/* settings */
+.set-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.set-row label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--fg-2);flex:1 1 200px}
+.cat-row{display:flex;flex-direction:column;gap:8px;padding:16px 0;border-top:1px solid var(--line)}
+.cat-row:first-child{border-top:0}
+.cat-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.cat-head .input{flex:1 1 160px;font-weight:600}
+.cat-head .grp{font-size:12px;color:var(--fg-2)}
+.map-table{width:100%;border-collapse:collapse;font-size:14px}
+.map-table td{padding:10px 8px 10px 0;border-top:1px solid var(--line);vertical-align:top}
+.map-table td:first-child{font-weight:600;white-space:nowrap;width:1%}
+.map-wrap{overflow-x:auto}
+.radio-row{display:flex;gap:6px;flex-wrap:wrap}
+
+/* toast + tour */
+.toasts{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-width:calc(100% - 32px)}
+.toast{background:var(--fg);color:var(--bg);padding:12px 20px;border-radius:999px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:tin .25s ease-out}
+@keyframes tin{from{transform:translateY(10px);opacity:0}}
+.tour{position:fixed;inset:0;z-index:80}
+.tour-spot{position:fixed;border-radius:20px;box-shadow:0 0 0 9999px rgba(0,0,0,.58);transition:all .35s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.tour-card{position:fixed;width:min(380px,calc(100vw - 32px));background:var(--bg);color:var(--fg);border-radius:20px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:10px;transition:top .35s,left .35s}
+.tour-card h3{font-size:21px}
+.tour-card p{font-size:15px;color:var(--fg-2)}
+.tour-foot{display:flex;align-items:center;gap:8px;margin-top:6px}
+.tour-foot .prog{font-size:12px;color:var(--fg-3);flex:1;font-variant-numeric:tabular-nums}
+.banner{background:var(--grow-bg);color:var(--grow);font-size:13px;text-align:center;padding:8px 16px}
+@media (prefers-reduced-motion: reduce){.tour-spot,.tour-card,.rcard{transition:none}.toast{animation:none}}
+</style>
+
+<div id="storage-banner" class="banner" hidden>이 브라우저에서는 저장 기능이 꺼져 있어요. 새로고침하면 기록이 사라지니 ‘내 정보 → 백업’으로 내보내 두세요.</div>
+<header class="nav">
+  <div class="nav-inner">
+    <button class="brand" data-go="graph" aria-label="너의 별자리는? 홈">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 9 9l6 4 5-9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="4" cy="18" r="2" fill="currentColor"/><circle cx="9" cy="9" r="2.4" fill="currentColor"/><circle cx="15" cy="13" r="1.7" fill="currentColor"/><circle cx="20" cy="4" r="2" fill="currentColor"/></svg>
+      너의 별자리는?
+    </button>
+    <nav class="nav-links" aria-label="주요 메뉴">
+      <button data-go="graph">별자리</button>
+      <button data-go="records">기록</button>
+      <button data-go="ability">능력치</button>
+      <button data-go="timeline">타임라인</button>
+      <button data-go="goal">목표</button>
+      <button data-go="summary">요약</button>
+      <button data-go="me">내 정보</button>
+    </nav>
+    <button class="btn btn-primary btn-sm nav-cta" id="btn-record">+ 기록하기</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="view" id="view-graph"></section>
+    <section class="view" id="view-records" hidden></section>
+    <section class="view" id="view-ability" hidden></section>
+    <section class="view" id="view-timeline" hidden></section>
+    <section class="view" id="view-goal" hidden></section>
+    <section class="view" id="view-summary" hidden></section>
+    <section class="view" id="view-me" hidden></section>
+  </div>
+</main>
+
+<div id="modal-root"></div>
+<div id="confirm-root"></div>
+<div id="tour-root"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+(() => {
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s || '').toLowerCase().replace(/\s+/g, '');
+const uid = () => Math.random().toString(36).slice(2, 10);
+const uniq = a => [...new Set(a)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const fmtDate = s => s ? `${+s.slice(0,4)}년 ${+s.slice(5,7)}월 ${+s.slice(8,10)}일` : '';
+const fmtMonth = s => `${+s.slice(0,4)}년 ${+s.slice(5,7)}월`;
+function hasBatchim(w){ const s = String(w).trim(); const c = s.charCodeAt(s.length-1);
+  if (c >= 0xAC00 && c <= 0xD7A3) return (c - 0xAC00) % 28 !== 0;
+  if (/[0-9]$/.test(s)) return /[013678]$/.test(s);
+  return /[lmnr]$/i.test(s); }
+const J = (w, withB, noB) => w + (hasBatchim(w) ? withB : noB);
+const STAR = 'M12 2.6l2.85 6.05 6.6.8-4.88 4.55 1.28 6.55L12 17.3l-5.85 3.25 1.28-6.55L2.55 9.45l6.6-.8z';
+const TYPES = ['공모전','프로젝트','수업','동아리','대외활동','봉사','인턴','아르바이트','개인 경험','기타'];
+const GUIDES = [
+  {k:'did', label:'무엇을 했나요?'},
+  {k:'role', label:'내가 맡은 역할은 무엇이었나요?'},
+  {k:'moment', label:'가장 기억에 남는 순간은 무엇이었나요?'},
+  {k:'change', label:'무엇이 달라졌나요?'},
+];
+
+/* keyword dictionary for tag suggestions (rule-based) */
+const DICT = {
+  '데이터 분석':['데이터 분석','데이터분석','데이터를 분석','분석했','분석을','eda'],
+  'Python':['python','파이썬','pandas','판다스','numpy'],
+  'SQL':['sql','쿼리','데이터베이스','mysql'],
+  '통계':['통계','회귀','가설검정','t검정','분산분석'],
+  '시각화':['시각화','대시보드','태블로','tableau','power bi','인포그래픽'],
+  '머신러닝':['머신러닝','딥러닝','예측 모델','모델 학습','인공지능'],
+  '엑셀':['엑셀','excel','스프레드시트','피벗'],
+  '리더십':['팀장','리더','이끌','회장','부장','대표로','주도','조장'],
+  '팀워크':['협업','팀원','팀워크','함께','팀 프로젝트','팀프로젝트'],
+  '커뮤니케이션':['소통','커뮤니케이션','설득','협상','조율'],
+  '발표':['발표','프레젠테이션','피칭','스피치','pt'],
+  '기획':['기획','아이디어','계획을','행사'],
+  '문제 정의':['문제 정의','문제를 정의','원인을','문제점','가설'],
+  '문제 해결':['해결','개선','효율'],
+  '마케팅':['마케팅','홍보','sns','광고','캠페인','브랜딩'],
+  '비즈니스 이해':['비즈니스','사업','수익','시장','비즈니스 모델','매출'],
+  '고객 이해':['고객','사용자 인터뷰','인터뷰','페르소나','설문'],
+  '리서치':['조사','리서치','논문','설문조사'],
+  '글쓰기':['글쓰기','보고서','기사','에세이','블로그'],
+  '디자인':['디자인','피그마','figma','ui','ux'],
+  '웹 개발':['html','css','웹사이트','프론트엔드','react','앱 개발','코딩'],
+  '공정 개선':['공정','생산 라인','생산성'],
+  '최적화':['최적화','시뮬레이션','선형계획'],
+  '물류':['물류','scm','공급망','재고'],
+  '품질관리':['품질','불량','6시그마'],
+  '회계':['회계','재무제표','원가'],
+  '재무':['재무','투자','주식','금융'],
+  '창업':['창업','스타트업'],
+  '봉사':['봉사','나눔','기부','멘토링'],
+  '영어':['영어','english','토익','토플','교환학생','해외'],
+  '책임감':['책임','끝까지','마감'],
+  '도전':['처음으로','도전','처음 해'],
+};
+const DOMAIN_HINTS = {
+  '경영':['경영','비즈니스 이해','마케팅','기획','회계','재무','창업','고객 이해','리서치'],
+  '디지털':['데이터 분석','Python','SQL','시각화','웹 개발','디자인','머신러닝'],
+  '산업':['공정 개선','물류','품질관리','최적화'],
+  '공학':['Python','통계','최적화','머신러닝','웹 개발','SQL','공정 개선'],
+  '데이터':['데이터 분석','Python','SQL','통계','시각화','머신러닝','엑셀'],
+  '통계':['통계','데이터 분석','엑셀'],
+  '컴퓨터':['Python','웹 개발','SQL','머신러닝'],
+  '소프트웨어':['Python','웹 개발','SQL','머신러닝'],
+  '경제':['재무','통계','비즈니스 이해'],
+  '디자인':['디자인','시각화','고객 이해'],
+  '미디어':['마케팅','글쓰기','디자인','발표'],
+  '심리':['고객 이해','리서치','커뮤니케이션'],
+  '교육':['봉사','발표','커뮤니케이션'],
+  '영어':['영어','글쓰기'], '영문':['영어','글쓰기'], '어문':['영어','글쓰기'],
+  '마케팅':['마케팅','고객 이해','리서치'],
+};
+function hintKeywords(name){
+  let kws = [name];
+  for (const [k, v] of Object.entries(DOMAIN_HINTS)) if (name.includes(k)) kws = kws.concat(v);
+  return uniq(kws);
+}
+
+/* ---------- state ---------- */
+const KEY = 'byeoljari.v1';
+let storageOK = true;
+try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); } catch { storageOK = false; }
+const emptyState = () => ({ version:1, tutorialDone:false, profile:{ name:'', majors:[] }, categories:[], experiences:[], tagCats:{}, goal:{ name:'', areas:[] }, virtuals:[] });
+let state = emptyState();
+let demo = false;          // true while the tutorial shows the sample student
+let realState = null;      // the viewer's own data, parked during the tutorial
+let view = 'graph';
+
+function load(){
+  if (!storageOK) return null;
+  try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
+}
+function save(){
+  if (demo || !storageOK) return true;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); return true; } catch { return false; }
+}
+function commit(fn){
+  const snap = JSON.stringify(state);
+  const out = fn();
+  if (!save()) { state = JSON.parse(snap); toast('저장 공간이 부족해 저장하지 못했어요. 첨부 파일을 줄이고 다시 시도해 주세요.'); return false; }
+  return out === undefined ? true : out;
+}
+function remember(k, v){ try { localStorage.setItem('byeoljari.ui.' + k, v); } catch {} }
+function recall(k){ try { return localStorage.getItem('byeoljari.ui.' + k); } catch { return null; } }
+
+/* ---------- derived data ---------- */
+const exps = () => [...state.experiences].sort((a, b) => a.date < b.date ? 1 : -1);
+const expById = id => state.experiences.find(e => e.id === id);
+const catById = id => state.categories.find(c => c.id === id);
+function allTags(){
+  const m = new Map();
+  for (const e of state.experiences) for (const t of e.tags) { const k = norm(t); if (!m.has(k)) m.set(k, {name:t, exps:[]}); m.get(k).exps.push(e); }
+  return [...m.values()];
+}
+function catsForTag(tag){
+  const ov = state.tagCats[tag];
+  if (Array.isArray(ov)) return ov.filter(id => catById(id));
+  return state.categories.filter(c => c.keywords.some(k => norm(k) === norm(tag))).map(c => c.id);
+}
+function catsForExp(e){
+  const auto = uniq(e.tags.flatMap(catsForTag));
+  return uniq(auto.concat(e.catAdd || [])).filter(id => !(e.catRemove || []).includes(id) && catById(id));
+}
+const score = e => (e.importance + e.growth) / 2;
+function labelMatches(label, e){
+  const n = norm(label);
+  return e.tags.some(t => norm(t) === n) || (n.length >= 2 && norm(e.title).includes(n));
+}
+function semOf(d){
+  const y = +d.slice(0,4), m = +d.slice(5,7), yy = String(y).slice(2), py = String(y-1).slice(2);
+  if (m >= 3 && m <= 6) return {key:`${y}-1`, name:`${y}년 1학기`, short:`${yy}·1학기`, order:y*10+1};
+  if (m >= 7 && m <= 8) return {key:`${y}-2s`, name:`${y}년 여름방학`, short:`${yy}·여름`, order:y*10+2};
+  if (m >= 9) return {key:`${y}-3`, name:`${y}년 2학기`, short:`${yy}·2학기`, order:y*10+3};
+  return {key:`${y-1}-4w`, name:`${y-1}년 겨울방학`, short:`${py}·겨울`, order:(y-1)*10+4};
+}
+function abilityStats(mode){
+  const rows = [];
+  if (mode === 'cat') {
+    for (const c of state.categories) {
+      const es = state.experiences.filter(e => catsForExp(e).includes(c.id));
+      if (es.length) rows.push(statRow(c.name, es));
+    }
+  } else {
+    for (const t of allTags()) rows.push(statRow(t.name, t.exps));
+  }
+  return rows.sort((a, b) => b.points - a.points || b.count - a.count);
+}
+function statRow(name, es){
+  const points = es.reduce((s, e) => s + e.growth, 0);
+  return { name, count: es.length, points, high: es.filter(e => e.growth >= 4).length, avg: points / es.length };
+}
+
+/* ---------- sample student ---------- */
+function makeSample(){
+  const s = emptyState();
+  s.tutorialDone = true;
+  s.profile = { name:'한별', majors:[{name:'디지털경영', role:'주전공'}, {name:'산업경영공학', role:'이중전공'}] };
+  const mk = (name, group) => ({ id: uid(), name, group, keywords: hintKeywords(name) });
+  s.categories = [mk('디지털경영','디지털경영'), mk('산업','산업경영공학'), mk('경영','산업경영공학'), mk('공학','산업경영공학')];
+  const E = (date, type, title, imp, gr, tags, body, guide = {}) => ({ id: uid(), date, type, title, importance: imp, growth: gr, tags, body, guide, attachments: [], catAdd: [], catRemove: [], createdAt: date });
+  s.experiences = [
+    E('2024-04-12','대외활동','신입생 OT 기획단',4,2.5,['기획','팀워크','커뮤니케이션'],'입학하자마자 신입생 OT 기획단에 들어갔다. 레크리에이션 순서를 맡아 동기들과 매일 밤 회의를 했다. 처음으로 무언가를 함께 만드는 재미를 알게 된 경험.'),
+    E('2024-05-20','수업','경영학원론 팀 발표',2.5,3,['발표','비즈니스 이해','팀워크'],'스타벅스의 사이렌 오더 사례로 팀 발표를 했다. 발표자를 맡아 처음으로 많은 사람 앞에서 말했는데, 생각보다 떨리지 않았다.'),
+    E('2024-07-15','봉사','지역아동센터 교육 봉사',5,2,['봉사','커뮤니케이션','책임감'],'여름방학 동안 매주 두 번 초등학생들에게 수학을 가르쳤다. 실력이 크게 늘었다기보다, 아이들이 마지막 날 써 준 편지가 아직도 책상에 붙어 있을 만큼 소중한 시간이었다.',{moment:'마지막 날 아이들이 손편지를 건네주던 순간.'}),
+    E('2024-10-08','동아리','마케팅 학회 MARK 신입 활동',3.5,3.5,['마케팅','리서치','고객 이해'],'학회에서 대학생 커피 소비 습관을 조사했다. 설문 문항을 직접 설계하고 120명의 응답을 정리했다.'),
+    E('2024-11-28','수업','파이썬 기초 기말 프로젝트',3,4,['Python','데이터 분석'],'pandas로 서울시 따릉이 대여 데이터를 분석했다. 코드를 처음 짜 봤는데, 원하는 그래프가 나왔을 때 데이터 분석이 재미있다는 걸 처음 느꼈다.'),
+    E('2025-01-20','아르바이트','카페 재고 정리 방식 개선',2,3,['문제 해결','물류'],'카페 아르바이트를 하며 매번 원두 재고가 헷갈리는 문제를 봤다. 엑셀 대신 간단한 체크 표를 만들어 점장님께 제안했고, 발주 실수가 줄었다.'),
+    E('2025-04-18','공모전','Haybit 데이터 분석 공모전',5,5,['데이터 분석','Python','리더십','문제 정의','시각화'],'4인 팀의 팀장으로 Haybit 데이터 분석 공모전에 참가했다. 매출 감소의 원인을 정의하는 데에만 2주를 썼고, Python으로 분석한 결과를 대시보드로 시각화했다. 장려상을 받았다.',{role:'팀장. 일정 관리와 문제 정의를 주도했다.',change:'데이터를 보기 전에 질문을 먼저 세워야 한다는 걸 배웠다.'}),
+    E('2025-05-30','수업','경영통계 팀 프로젝트',3,3.5,['통계','엑셀','팀워크'],'학식 가격과 만족도의 관계를 회귀분석으로 살펴봤다. 엑셀 분석 도구를 처음 제대로 써 봤다.'),
+    E('2025-08-22','인턴','스타트업 모아 마케팅 인턴',4.5,4.5,['마케팅','데이터 분석','비즈니스 이해','커뮤니케이션'],'두 달 동안 SNS 광고 성과를 매주 분석해 리포트로 공유했다. 숫자가 실제 의사결정으로 이어지는 걸 처음 눈으로 봤다.',{change:'비즈니스 관점에서 데이터를 해석하는 눈이 생겼다.'}),
+    E('2025-10-10','동아리','마케팅 학회 기획부장',4,4,['리더십','기획','마케팅'],'학회 기획부장을 맡아 한 학기 세션 커리큘럼을 짰다. 부원 12명의 의견을 조율하는 일이 가장 어려웠다.'),
+    E('2025-12-05','공모전','교내 해커톤',3.5,3.5,['기획','문제 정의','웹 개발','팀워크'],'캠퍼스 빈 강의실 찾기 서비스를 기획했다. 개발은 팀원이 주로 했고 나는 문제 정의와 화면 기획을 맡았다.'),
+    E('2026-02-14','개인 경험','혼자 떠난 오사카 여행',4.5,1.5,['도전'],'처음으로 혼자 해외여행을 했다. 역량이 늘었다기보다는, 혼자서도 괜찮다는 걸 알게 된 소중한 일주일.'),
+    E('2026-04-24','수업','생산관리 공정 개선 과제',3,3,['공정 개선','최적화','문제 해결'],'이중전공 수업에서 가상 공장의 병목 공정을 찾아 개선안을 냈다. 산업공학식 사고가 아직 낯설다.'),
+    E('2026-06-12','동아리','데이터 분석 학회 스터디 리더',4,4.5,['데이터 분석','리더십','Python','발표'],'데이터 분석 학회에서 Python 스터디 리더를 맡았다. 매주 실습 자료를 만들어 발표했고, 가르치면서 오히려 내가 가장 많이 배웠다.'),
+    E('2026-09-03','공모전','공공데이터 활용 공모전 예선',3.5,3,['데이터 분석','시각화','비즈니스 이해'],'공공데이터로 지역 상권 변화를 분석해 예선을 통과했다. SQL을 몰라 데이터 추출에서 시간이 오래 걸렸다.'),
+  ];
+  s.goal = { name:'Data Analyst', areas:['데이터 분석','SQL','통계','문제 정의','비즈니스 이해','시각화'] };
+  s.virtuals = [
+    { id: uid(), label:'SQL', links:['데이터 분석','Python'], createdAt:'2026-09-10', realizedAt:null, realizedBy:null },
+    { id: uid(), label:'통계 프로젝트', links:['통계','데이터 분석'], createdAt:'2026-09-10', realizedAt:null, realizedBy:null },
+    { id: uid(), label:'산업공학 프로젝트', links:['공정 개선','최적화'], createdAt:'2026-09-10', realizedAt:null, realizedBy:null },
+  ];
+  return s;
+}
+
+/* ---------- toast / modal / confirm ---------- */
+function toast(msg){
+  const el = document.createElement('div'); el.className = 'toast'; el.textContent = msg;
+  $('#toasts').appendChild(el); setTimeout(() => el.remove(), 3600);
+}
+function openModal(html, cls = ''){
+  const root = $('#modal-root');
+  root.innerHTML = `<div class="layer" data-layer><div class="sheet ${cls}" role="dialog" aria-modal="true">${html}</div></div>`;
+  const layer = root.firstElementChild;
+  layer.addEventListener('mousedown', e => { if (e.target === layer) closeModal(); });
+  $$('[data-close]', layer).forEach(b => b.addEventListener('click', closeModal));
+  document.body.style.overflow = 'hidden';
+  return layer;
+}
+function closeModal(){ $('#modal-root').innerHTML = ''; document.body.style.overflow = ''; }
+function ask(msg, ok = '확인', danger = false){
+  return new Promise(res => {
+    const root = $('#confirm-root');
+    root.innerHTML = `<div class="layer" style="z-index:70"><div class="sheet narrow" role="alertdialog" aria-modal="true"><div class="sheet-body" style="padding-top:24px"><p style="font-size:17px">${msg}</p></div><div class="sheet-foot"><button class="btn btn-quiet" data-a="0">취소</button><button class="btn ${danger ? 'btn-primary" style="background:var(--need)' : 'btn-primary'}" data-a="1">${esc(ok)}</button></div></div></div>`;
+    $$('[data-a]', root).forEach(b => b.addEventListener('click', () => { root.innerHTML = ''; res(b.dataset.a === '1'); }));
+    $('[data-a="1"]', root).focus();
+  });
+}
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if ($('#confirm-root').innerHTML) { $('#confirm-root').innerHTML = ''; return; }
+  if ($('#modal-root').innerHTML) closeModal();
+});
+
+/* ---------- stars widget ---------- */
+function fillPct(v, i){ return clamp((v - (i - 1)) * 100, 0, 100); }
+function starsHTML(id, v, ro = false){
+  return `<div class="stars${ro ? ' ro' : ''}" ${id ? `id="${id}"` : ''} ${ro ? `aria-label="별점 ${v}점"` : `role="slider" tabindex="0" aria-valuemin="0.5" aria-valuemax="5" aria-valuenow="${v}" aria-valuetext="${v}점"`} data-v="${v}">${
+    [1,2,3,4,5].map(i => `<span class="star" data-i="${i}"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="s-bg" d="${STAR}"/></svg><span class="s-fill" style="width:${fillPct(v, i)}%"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${STAR}"/></svg></span></span>`).join('')
+  }<span class="stars-val">${Number(v).toFixed(1)}</span></div>`;
+}
+function paintStars(el, v){
+  $$('.star', el).forEach(s => { $('.s-fill', s).style.width = fillPct(v, +s.dataset.i) + '%'; });
+  $('.stars-val', el).textContent = Number(v).toFixed(1);
+}
+function bindStars(el, onChange){
+  const valAt = ev => { const s = ev.target.closest('.star'); if (!s) return null; const r = s.getBoundingClientRect(); return +s.dataset.i - (ev.clientX - r.left < r.width / 2 ? .5 : 0); };
+  const set = v => { v = clamp(v, .5, 5); el.dataset.v = v; el.setAttribute('aria-valuenow', v); el.setAttribute('aria-valuetext', v + '점'); paintStars(el, v); onChange(v); };
+  el.addEventListener('mousemove', ev => { const v = valAt(ev); if (v) paintStars(el, v); });
+  el.addEventListener('mouseleave', () => paintStars(el, +el.dataset.v));
+  el.addEventListener('click', ev => { const v = valAt(ev); if (v) set(v); });
+  el.addEventListener('keydown', ev => {
+    if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') { ev.preventDefault(); set(+el.dataset.v + .5); }
+    if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') { ev.preventDefault(); set(+el.dataset.v - .5); }
+  });
+}
+const miniStars = (label, v) => `<span class="mini-stars">${label} <b>★ ${Number(v).toFixed(1)}</b></span>`;
+
+/* ---------- navigation ---------- */
+const RENDER = { graph: renderGraphView, records: renderRecords, ability: renderAbility, timeline: renderTimeline, goal: renderGoal, summary: renderSummary, me: renderMe };
+function go(v){
+  view = v; remember('view', v);
+  for (const k of Object.keys(RENDER)) $('#view-' + k).hidden = k !== v;
+  $$('.nav-links button').forEach(b => b.dataset.go === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+  RENDER[v]();
+  window.scrollTo({ top: 0 });
+}
+function rerender(){ RENDER[view](); }
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]'); if (g && !e.target.closest('#tour-root')) { go(g.dataset.go); }
+  const r = e.target.closest('[data-open-exp]'); if (r) openDetail(r.dataset.openExp);
+  const n = e.target.closest('[data-new-record]'); if (n) openEditor();
+});
+$('#btn-record').addEventListener('click', () => openEditor());
+
+const hero = (eyebrow, title, lead, extra = '') => `<div class="hero"><div class="eyebrow">${eyebrow}</div><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ''}${extra}</div>`;
+const who = () => state.profile.name || '당신';
+
+/* ================= GRAPH ================= */
+let sim = null, zoomT = null, showLabels = recall('labels') !== '0';
+const posCache = new Map();
+let panelNode = null;
+
+function buildGraph(){
+  const nodes = [], links = [], idx = new Map();
+  const add = n => { if (!idx.has(n.id)) { idx.set(n.id, n); nodes.push(n); } return idx.get(n.id); };
+  for (const c of state.categories) add({ id:'c:' + c.id, type:'cat', label:c.name, ref:c });
+  for (const t of allTags()) {
+    const tn = add({ id:'t:' + norm(t.name), type:'tag', label:t.name, count:t.exps.length });
+    for (const cid of catsForTag(t.name)) links.push({ source: tn.id, target: 'c:' + cid, kind:'tc' });
+  }
+  for (const e of state.experiences) {
+    add({ id:'e:' + e.id, type:'exp', label:e.title, ref:e });
+    for (const t of e.tags) links.push({ source:'e:' + e.id, target:'t:' + norm(t), kind:'et' });
+    for (const cid of (e.catAdd || [])) if (catById(cid)) links.push({ source:'e:' + e.id, target:'c:' + cid, kind:'ec' });
+  }
+  for (const v of state.virtuals.filter(v => !v.realizedAt)) {
+    add({ id:'v:' + v.id, type:'virt', label:v.label, ref:v });
+    for (const l of v.links) if (idx.has('t:' + norm(l))) links.push({ source:'v:' + v.id, target:'t:' + norm(l), kind:'v' });
+  }
+  for (const n of nodes) {
+    if (n.type === 'exp') n.r = 5 + score(n.ref) * 2.6;
+    else if (n.type === 'tag') n.r = 3.5 + Math.sqrt(n.count) * 2.2;
+    else if (n.type === 'cat') n.r = 20 + Math.sqrt(links.filter(l => l.target === n.id).length) * 3;
+    else n.r = 10;
+    const p = posCache.get(n.id);
+    if (p) { n.x = p.x; n.y = p.y; } else { n.x = (Math.random() - .5) * 300; n.y = (Math.random() - .5) * 300; }
+  }
+  return { nodes, links };
+}
+
+function renderGraphView(){
+  const n = state.experiences.length, tags = allTags().length;
+  const virt = state.virtuals.filter(v => !v.realizedAt).length;
+  $('#view-graph').innerHTML = hero(
+    'Experience Graph',
+    `${esc(who())}의 별자리.`,
+    n ? `경험 ${n}개와 태그 ${tags}개가 이어져 있어요.${virt ? ` 아직 채워지지 않은 가상 별이 ${virt}개 있어요.` : ''} 큰 별일수록 소중하고, 크게 성장한 경험이에요.` : '경험을 기록하면 별이 떠요. 같은 태그를 가진 경험끼리 이어지며 나만의 별자리가 만들어져요.'
+  ) + `
+  <div class="sky" id="graph">
+    <svg id="graph-svg" role="img" aria-label="경험과 태그가 연결된 별자리 그래프"></svg>
+    <div class="sky-tools">
+      <button class="sky-btn" id="g-add-virt">+ 가상 별</button>
+      <button class="sky-btn" id="g-labels" aria-pressed="${showLabels}">이름 보기</button>
+      <button class="sky-btn" id="g-reset">가운데로</button>
+    </div>
+    <div class="legend" id="graph-legend">
+      <span><i class="lg" style="background:var(--exp);box-shadow:0 0 8px var(--exp)"></i>경험</span>
+      <span><i class="lg" style="background:var(--tag);width:7px;height:7px"></i>태그</span>
+      <span><i class="lg" style="border:1.5px solid var(--cat);background:rgba(41,151,255,.15)"></i>전공 분야</span>
+      <span><i class="lg" style="border:1.5px dashed var(--virt)"></i>가상 별</span>
+    </div>
+    <div class="sky-panel" id="graph-panel" hidden></div>
+    ${n ? '' : `<div class="sky-empty"><div><h3>아직 하늘이 비어 있어요.</h3><p>첫 번째 경험을 기록하면 이곳에 별이 떠요. 거창하지 않아도 괜찮아요. 나에게 의미 있었던 일이면 충분해요.</p><button class="btn btn-primary" data-new-record>첫 경험 기록하기</button>${state.categories.length ? '' : '<button class="link" style="color:#2997ff" data-go="me">먼저 전공을 설정할래요</button>'}</div></div>`}
+  </div>`;
+  $('#g-labels').onclick = e => { showLabels = !showLabels; remember('labels', showLabels ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLabels); if (typeof d3 !== 'undefined') d3.selectAll('#graph-svg .lbl').attr('display', d => labelVisible(d) ? null : 'none'); };
+  $('#g-reset').onclick = () => { zoomT = null; drawGraph(); };
+  $('#g-add-virt').onclick = () => openVirtualForm();
+  requestAnimationFrame(drawGraph);
+}
+const labelVisible = d => showLabels || d.type === 'cat' || d.type === 'virt';
+
+function drawGraph(){
+  const wrap = $('#graph'); if (!wrap || !wrap.clientWidth) return;
+  if (typeof d3 === 'undefined') { $('#graph-svg').outerHTML = '<p style="padding:80px 24px;text-align:center;color:var(--sky-dim)">그래프 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인한 뒤 새로고침해 주세요.</p>'; return; }
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  if (sim) { sim.stop(); sim.nodes().forEach(n => posCache.set(n.id, { x: n.x, y: n.y })); }
+  const { nodes, links } = buildGraph();
+  const svg = d3.select('#graph-svg').attr('viewBox', [-W/2, -H/2, W, H]);
+  svg.selectAll('*').remove();
+  const defs = svg.append('defs');
+  const glow = defs.append('filter').attr('id', 'glow').attr('x', '-100%').attr('y', '-100%').attr('width', '300%').attr('height', '300%');
+  glow.append('feGaussianBlur').attr('stdDeviation', 4).attr('result', 'b');
+  const fm = glow.append('feMerge'); fm.append('feMergeNode').attr('in', 'b'); fm.append('feMergeNode').attr('in', 'SourceGraphic');
+  const rg = defs.append('radialGradient').attr('id', 'starg');
+  rg.append('stop').attr('offset', '0%').attr('stop-color', '#fffaf0');
+  rg.append('stop').attr('offset', '45%').attr('stop-color', '#ffe3a3');
+  rg.append('stop').attr('offset', '100%').attr('stop-color', '#f0b44c');
+
+  // fixed background stars (seeded so they don't jump between renders)
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const bg = svg.append('g').attr('aria-hidden', 'true');
+  for (let i = 0; i < 160; i++) bg.append('circle').attr('cx', (rnd() - .5) * W).attr('cy', (rnd() - .5) * H).attr('r', rnd() * 1.1 + .2)
+    .attr('fill', '#fff').attr('opacity', rnd() * .5 + .1).attr('class', i % 5 === 0 ? 'twinkle' : null).style('animation-delay', (rnd() * 4) + 's');
+
+  const g = svg.append('g');
+  const zoom = d3.zoom().scaleExtent([.25, 4]).on('zoom', e => { zoomT = e.transform; g.attr('transform', e.transform); });
+  svg.call(zoom).on('dblclick.zoom', null);
+  svg.call(zoom.transform, zoomT || d3.zoomIdentity);
+  svg.on('click', e => { if (e.target === svg.node()) closePanel(); });
+
+  const link = g.append('g').selectAll('line').data(links).join('line')
+    .attr('stroke', d => d.kind === 'v' ? 'rgba(255,255,255,.4)' : d.kind === 'tc' ? 'rgba(41,151,255,.32)' : 'rgba(255,255,255,.2)')
+    .attr('stroke-width', d => d.kind === 'et' ? 1 : .8)
+    .attr('stroke-dasharray', d => d.kind === 'v' ? '3 4' : null);
+
+  const node = g.append('g').selectAll('g').data(nodes).join('g').attr('class', 'node')
+    .attr('tabindex', 0).attr('role', 'button').attr('aria-label', d => ({exp:'경험', tag:'태그', cat:'전공 분야', virt:'가상 별'}[d.type]) + ' ' + d.label);
+  node.each(function(d){
+    const s = d3.select(this);
+    if (d.type === 'exp') {
+      s.append('circle').attr('r', d.r).attr('fill', 'url(#starg)').attr('filter', 'url(#glow)');
+      s.append('circle').attr('r', d.r * .35).attr('fill', '#fff');
+    } else if (d.type === 'tag') {
+      s.append('circle').attr('r', d.r).attr('fill', '#9fc6ff').attr('opacity', .9);
+    } else if (d.type === 'cat') {
+      s.append('circle').attr('r', d.r).attr('fill', 'rgba(41,151,255,.14)').attr('stroke', '#2997ff').attr('stroke-width', 1.5);
+      s.append('circle').attr('r', d.r + 6).attr('fill', 'none').attr('stroke', 'rgba(41,151,255,.25)');
+    } else {
+      s.append('circle').attr('r', d.r).attr('fill', 'rgba(255,255,255,.04)').attr('stroke', 'rgba(255,255,255,.75)').attr('stroke-width', 1.4).attr('stroke-dasharray', '3 3');
+    }
+    const short = d.label.length > 14 ? d.label.slice(0, 13) + '…' : d.label;
+    s.append('text').attr('class', 'lbl')
+      .attr('y', d.type === 'cat' ? 4 : d.r + 13).attr('text-anchor', 'middle')
+      .attr('fill', d.type === 'tag' ? '#cfe2ff' : d.type === 'virt' ? 'rgba(255,255,255,.7)' : '#fff')
+      .attr('font-size', d.type === 'cat' ? 13 : d.type === 'exp' ? 11.5 : 11)
+      .attr('font-weight', d.type === 'cat' ? 700 : d.type === 'exp' ? 600 : 500)
+      .attr('display', labelVisible(d) ? null : 'none')
+      .text(d.type === 'virt' ? short + ' (가상)' : short);
+  });
+
+  const adj = new Map(nodes.map(n => [n.id, new Set([n.id])]));
+  for (const l of links) { adj.get(l.source)?.add(l.target); adj.get(l.target)?.add(l.source); }
+  const focus = id => {
+    node.attr('opacity', d => !id || adj.get(id).has(d.id) ? 1 : .18);
+    link.attr('opacity', d => !id || d.source.id === id || d.target.id === id ? 1 : .08);
+  };
+  node.on('mouseenter', (e, d) => focus(d.id)).on('mouseleave', () => focus(panelNode))
+    .on('click', (e, d) => { e.stopPropagation(); openPanel(d); focus(d.id); })
+    .on('keydown', (e, d) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPanel(d); focus(d.id); } });
+
+  sim = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id(d => d.id).distance(l => l.kind === 'tc' ? 95 : l.kind === 'v' ? 70 : 62).strength(l => l.kind === 'tc' ? .35 : .6))
+    .force('charge', d3.forceManyBody().strength(d => d.type === 'cat' ? -520 : d.type === 'exp' ? -230 : -130))
+    .force('collide', d3.forceCollide(d => d.r + 8))
+    .force('x', d3.forceX(0).strength(.045)).force('y', d3.forceY(0).strength(.065))
+    .on('tick', () => {
+      link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+      node.attr('transform', d => `translate(${d.x},${d.y})`);
+    })
+    .on('end', () => nodes.forEach(n => posCache.set(n.id, { x: n.x, y: n.y })));
+  if (nodes.every(n => posCache.has(n.id))) sim.alpha(.25);
+
+  node.call(d3.drag().clickDistance(4)
+    .on('start', (e, d) => { if (!e.active) sim.alphaTarget(.25).restart(); d.fx = d.x; d.fy = d.y; })
+    .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+    .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
+  if (panelNode) { const pn = nodes.find(n => n.id === panelNode); if (pn) { openPanel(pn); focus(pn.id); } else closePanel(); }
+}
+function closePanel(){ panelNode = null; const p = $('#graph-panel'); if (p) p.hidden = true; if (typeof d3 !== 'undefined') { d3.selectAll('#graph-svg .node').attr('opacity', 1); d3.selectAll('#graph-svg line').attr('opacity', 1); } }
+function openPanel(d){
+  panelNode = d.id;
+  const p = $('#graph-panel'); if (!p) return;
+  let h = `<button class="icon-btn close" aria-label="닫기" id="gp-close">×</button>`;
+  if (d.type === 'exp') {
+    const e = d.ref;
+    h += `<div class="muted">${fmtDate(e.date)} · ${esc(e.type)}</div><h3>${esc(e.title)}</h3>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">${miniStars('중요도', e.importance)}${miniStars('성장', e.growth)}</div>
+      <p class="muted" style="display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden">${esc(e.body)}</p>
+      <div class="chips">${e.tags.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>
+      <button class="btn btn-primary btn-sm" data-open-exp="${e.id}" style="align-self:flex-start">자세히 보기</button>`;
+  } else if (d.type === 'tag') {
+    const t = allTags().find(t => norm(t.name) === norm(d.label));
+    const es = (t ? t.exps : []).sort((a, b) => b.growth - a.growth);
+    const cats = catsForTag(d.label).map(id => catById(id).name);
+    h += `<div class="muted">태그</div><h3>${esc(d.label)}</h3>
+      <p class="muted">경험 ${es.length}개에 등장해요${cats.length ? ` · ${cats.map(esc).join(', ')} 분야와 연결` : ''}.</p>
+      <div>${es.map(e => `<button class="list-item" data-open-exp="${e.id}"><span>${esc(e.title)}</span><span class="muted">성장 ★${e.growth.toFixed(1)}</span></button>`).join('')}</div>
+      <button class="sky-btn" id="gp-filter" style="align-self:flex-start">이 태그의 기록 모아보기</button>`;
+  } else if (d.type === 'cat') {
+    const c = d.ref;
+    const es = state.experiences.filter(e => catsForExp(e).includes(c.id));
+    h += `<div class="muted">전공 분야 · ${esc(c.group)}</div><h3>${esc(c.name)}</h3>
+      <p class="muted">이 분야와 이어진 경험 ${es.length}개</p>
+      <div>${es.slice(0, 8).map(e => `<button class="list-item" data-open-exp="${e.id}"><span>${esc(e.title)}</span><span class="muted">${e.date.slice(0, 7)}</span></button>`).join('')}</div>
+      <div class="muted" style="font-size:12px">연결 키워드: ${c.keywords.map(esc).join(', ') || '없음'}</div>`;
+  } else {
+    const v = d.ref;
+    h += `<div class="muted">가상 별 · ${fmtDate(v.createdAt)}에 추가</div><h3>${esc(v.label)}</h3>
+      <p class="muted">앞으로 채우고 싶은 경험이에요. ‘${esc(v.label)}’ 태그가 달린 경험을 기록하면 자동으로 실제 별이 돼요.</p>
+      ${v.links.length ? `<div class="chips">${v.links.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="gp-fill">이 경험 기록하기</button><button class="sky-btn" id="gp-del">삭제</button></div>`;
+  }
+  p.innerHTML = h; p.hidden = false;
+  $('#gp-close').onclick = closePanel;
+  const f = $('#gp-filter'); if (f) f.onclick = () => { recQ = d.label; go('records'); };
+  const fill = $('#gp-fill'); if (fill) fill.onclick = () => openEditor(null, { tags: [d.ref.label] });
+  const del = $('#gp-del'); if (del) del.onclick = async () => { if (await ask(`가상 별 ‘${esc(d.ref.label)}’을(를) 삭제할까요?`, '삭제', true)) { commit(() => { state.virtuals = state.virtuals.filter(v => v.id !== d.ref.id); }); closePanel(); rerender(); } };
+}
+
+/* ---------- virtual star form ---------- */
+function openVirtualForm(label = ''){
+  const tags = allTags().map(t => t.name);
+  const sel = new Set();
+  const layer = openModal(`
+    <div class="sheet-head"><h2>가상 별 추가</h2><button class="icon-btn" data-close aria-label="닫기">×</button></div>
+    <div class="sheet-body" style="display:flex;flex-direction:column;gap:18px">
+      <p style="color:var(--fg-2);font-size:15px">앞으로 채우고 싶은 경험이나 역량을 하늘에 미리 띄워 두세요. 같은 이름의 태그가 달린 경험을 기록하면 실제 별로 바뀌어요.</p>
+      <label class="field"><span class="field-label">이름</span><input class="input" id="vf-label" placeholder="예: SQL, 통계 프로젝트" value="${esc(label)}"></label>
+      <div class="field"><span class="field-label">어떤 별과 이어질까요? (선택)</span>
+        ${tags.length ? `<div class="chips" id="vf-tags">${tags.map(t => `<button class="chip" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div>` : '<span class="field-hint">아직 태그가 없어요. 경험을 기록하면 여기서 연결할 수 있어요.</span>'}
+      </div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-quiet" data-close>취소</button><button class="btn btn-primary" id="vf-save">하늘에 띄우기</button></div>`, 'narrow');
+  $$('#vf-tags .chip', layer).forEach(b => b.onclick = () => { const t = b.dataset.t; sel.has(t) ? sel.delete(t) : sel.add(t); b.classList.toggle('on'); });
+  $('#vf-label', layer).focus();
+  $('#vf-save', layer).onclick = () => {
+    const l = $('#vf-label', layer).value.trim();
+    if (!l) { toast('가상 별의 이름을 적어 주세요.'); return; }
+    if (state.virtuals.some(v => !v.realizedAt && norm(v.label) === norm(l))) { toast(`‘${l}’ 가상 별은 이미 있어요.`); return; }
+    if (commit(() => { state.virtuals.push({ id: uid(), label: l, links: [...sel], createdAt: today(), realizedAt: null, realizedBy: null }); })) {
+      closeModal(); toast(`가상 별 ‘${l}’을(를) 띄웠어요.`); rerender();
+    }
+  };
+}
+
+/* ================= RECORDS ================= */
+let recQ = '', recType = '', recSort = 'date';
+function renderRecords(){
+  const el = $('#view-records');
+  el.innerHTML = hero('기록', '내가 지나온 모든 순간.', state.experiences.length ? `지금까지 ${state.experiences.length}개의 경험을 기록했어요.` : '') + `
+    <div class="toolbar">
+      <input class="input search" id="rq" type="search" placeholder="제목, 내용, 태그로 찾기" value="${esc(recQ)}" aria-label="기록 검색">
+      <select class="select input" id="rtype" aria-label="유형 필터"><option value="">모든 유형</option>${TYPES.map(t => `<option ${t === recType ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      <select class="select input" id="rsort" aria-label="정렬"><option value="date">최신순</option><option value="imp" ${recSort === 'imp' ? 'selected' : ''}>중요도순</option><option value="growth" ${recSort === 'growth' ? 'selected' : ''}>성장순</option></select>
+    </div>
+    <div id="records-grid"></div>`;
+  const draw = () => {
+    const q = norm(recQ);
+    let list = exps().filter(e => (!recType || e.type === recType) && (!q || norm(e.title + e.body + e.tags.join(' ') + Object.values(e.guide || {}).join(' ')).includes(q)));
+    if (recSort === 'imp') list.sort((a, b) => b.importance - a.importance);
+    if (recSort === 'growth') list.sort((a, b) => b.growth - a.growth);
+    $('#records-grid').innerHTML = !state.experiences.length
+      ? `<div class="empty tile"><h3>아직 기록이 없어요.</h3><p>수업, 동아리, 공모전은 물론 개인적으로 의미 있었던 일도 좋아요.</p><button class="btn btn-primary" data-new-record>첫 경험 기록하기</button></div>`
+      : !list.length ? `<div class="empty"><h3>찾는 기록이 없어요.</h3><p>검색어나 유형을 바꿔 보세요.</p></div>`
+      : `<div class="cards">${list.map(e => `
+        <button class="rcard" data-open-exp="${e.id}">
+          <div class="meta"><span>${fmtDate(e.date)}</span><span>·</span><span>${esc(e.type)}</span>${e.attachments?.length ? `<span>· 첨부 ${e.attachments.length}</span>` : ''}</div>
+          <h3>${esc(e.title)}</h3>
+          <p class="ex">${esc(e.body || Object.values(e.guide || {}).join(' '))}</p>
+          <div class="chips">${e.tags.slice(0, 5).map(t => `<span class="chip">${esc(t)}</span>`).join('')}${e.tags.length > 5 ? `<span class="chip ghost">+${e.tags.length - 5}</span>` : ''}</div>
+          <div class="rates">${miniStars('삶에서의 중요도', e.importance)}${miniStars('성장 영향', e.growth)}</div>
+        </button>`).join('')}</div>`;
+  };
+  $('#rq').oninput = e => { recQ = e.target.value; draw(); };
+  $('#rtype').onchange = e => { recType = e.target.value; draw(); };
+  $('#rsort').onchange = e => { recSort = e.target.value; draw(); };
+  draw();
+}
+
+function openDetail(id){
+  const e = expById(id); if (!e) return;
+  const cats = catsForExp(e).map(c => catById(c).name);
+  const guide = GUIDES.filter(g => e.guide?.[g.k]).map(g => `<div class="qa"><b>${g.label}</b>${esc(e.guide[g.k])}</div>`).join('');
+  const layer = openModal(`
+    <div class="sheet-head"><div><div style="font-size:13px;color:var(--fg-2)">${fmtDate(e.date)} · ${esc(e.type)}</div><h2>${esc(e.title)}</h2></div><button class="icon-btn" data-close aria-label="닫기">×</button></div>
+    <div class="sheet-body detail">
+      <div class="kv">
+        <div>삶에서의 중요도${starsHTML('', e.importance, true)}</div>
+        <div>성장에 미친 영향${starsHTML('', e.growth, true)}</div>
+      </div>
+      ${e.body ? `<div class="body">${esc(e.body)}</div>` : ''}
+      ${guide}
+      ${e.attachments?.length ? `<div class="field"><span class="field-label">첨부</span><div class="att-list">${e.attachments.map(a => a.type.startsWith('image/') ? `<div class="att"><img src="${a.data}" alt="${esc(a.name)}"></div>` : `<div class="att">${esc(a.name)}</div>`).join('')}</div></div>` : ''}
+      <div class="field"><span class="field-label">태그</span><div class="chips">${e.tags.map(t => `<span class="chip">${esc(t)}</span>`).join('') || '<span class="field-hint">태그 없음</span>'}</div></div>
+      <div class="field"><span class="field-label">연결된 전공 분야</span><div class="chips">${cats.map(c => `<span class="chip">${esc(c)}</span>`).join('') || '<span class="field-hint">연결된 분야 없음</span>'}</div></div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-danger" id="dt-del">삭제</button><span class="spacer"></span><button class="btn btn-quiet" data-close>닫기</button><button class="btn btn-primary" id="dt-edit">편집</button></div>`);
+  $('#dt-edit', layer).onclick = () => openEditor(e.id);
+  $('#dt-del', layer).onclick = async () => {
+    if (!await ask(`‘${esc(e.title)}’ 기록을 삭제할까요? 되돌릴 수 없어요.`, '삭제', true)) return;
+    if (commit(() => { state.experiences = state.experiences.filter(x => x.id !== e.id); })) { closeModal(); toast('기록을 삭제했어요.'); rerender(); }
+  };
+}
+
+/* ================= EDITOR ================= */
+function extractTags(text){
+  const t = text.toLowerCase(), hits = [];
+  for (const [tag, trig] of Object.entries(DICT)) {
+    const n = trig.reduce((s, k) => s + (t.split(k.toLowerCase()).length - 1), 0);
+    if (n) hits.push({ tag, n });
+  }
+  const nt = norm(text);
+  for (const at of allTags()) if (norm(at.name).length >= 2 && nt.includes(norm(at.name)) && !hits.some(h => norm(h.tag) === norm(at.name))) hits.push({ tag: at.name, n: 1.5 });
+  return hits.sort((a, b) => b.n - a.n).map(h => h.tag);
+}
+const ASPECTS = [
+  { re:/역할|맡|담당|팀장|리더/, q:['그 활동에서 내가 맡은 역할은 무엇이었나요?','팀 안에서 나는 주로 어떤 일을 했나요?'] },
+  { re:/어려|힘들|고민|문제|실패|막혔|낯설/, q:['진행하면서 가장 어려웠던 순간은 언제였나요?','예상과 다르게 흘러간 일이 있었나요?'] },
+  { re:/시도|해결|바꿨|만들|제안|정리|분석|설계/, q:['그 어려움을 넘기 위해 구체적으로 어떤 행동을 했나요?','내가 직접 제안하거나 바꾼 것이 있었나요?'] },
+  { re:/달라|변화|성장|배웠|배운|깨달|느꼈|알게/, q:['이 경험 전과 후로 나에게서 달라진 점은 무엇인가요?','이 경험에서 배운 것을 하나만 꼽는다면요?'] },
+  { re:/기억|순간|뿌듯|기뻤|인상|감동/, q:['가장 기억에 남는 장면 하나를 떠올려 볼까요?','그때 어떤 기분이 들었나요?'] },
+];
+const TAG_Q = {
+  '리더십':'팀을 이끌며 내렸던 결정 중 가장 고민했던 것은 무엇인가요?',
+  '데이터 분석':'데이터에서 발견한 가장 의미 있는 사실은 무엇이었나요?',
+  '팀워크':'팀원과 의견이 달랐던 순간을 어떻게 풀었나요?',
+  '발표':'발표를 준비하며 가장 신경 쓴 부분은 무엇이었나요?',
+  '마케팅':'누구에게 무엇을 전하고 싶었나요? 타깃을 어떻게 정했나요?',
+  '봉사':'함께한 사람들에게서 어떤 반응을 느꼈나요?',
+  '기획':'처음 아이디어와 최종 결과는 어떻게 달라졌나요?',
+  '문제 해결':'문제의 원인은 무엇이었고, 어떻게 알아냈나요?',
+};
+let askRound = 0;
+function guideQuestions(text, tags){
+  askRound++;
+  if (text.trim().length < 15) return ['언제, 어디서, 누구와 함께한 일인가요?','그 일을 시작하게 된 계기는 무엇이었나요?','지금 떠오르는 장면 하나를 그대로 적어 볼까요?'];
+  const out = ASPECTS.filter(a => !a.re.test(text)).map(a => a.q[askRound % a.q.length]);
+  const tq = tags.map(t => TAG_Q[t]).filter(Boolean);
+  if (tq.length) out.splice(1, 0, tq[askRound % tq.length]);
+  if (!out.length) out.push('이 경험이 지금의 나에게 어떤 의미로 남아 있나요?', '다시 한다면 무엇을 다르게 해 보고 싶나요?');
+  return out.slice(0, 3);
+}
+
+function openEditor(id, preset = {}){
+  const src = id ? expById(id) : null;
+  const ed = src ? JSON.parse(JSON.stringify(src)) : {
+    id: null, title: '', date: today(), type: '프로젝트', body: '', guide: {}, tags: preset.tags || [],
+    importance: 3, growth: 3, attachments: [], catAdd: [], catRemove: []
+  };
+  ed.catAdd = ed.catAdd || []; ed.catRemove = ed.catRemove || []; ed.guide = ed.guide || {}; ed.attachments = ed.attachments || [];
+  const openGuides = new Set(Object.keys(ed.guide || {}).filter(k => ed.guide[k]));
+  const layer = openModal(`
+    <div class="sheet-head"><h2>${src ? '경험 편집' : '새로운 경험 기록'}</h2><button class="icon-btn" data-close aria-label="닫기">×</button></div>
+    <div class="sheet-body editor">
+      <div class="ed-main">
+        <input class="ed-title" id="ed-title" placeholder="경험의 이름 (예: Haybit 데이터 분석 공모전)" value="${esc(ed.title)}" aria-label="경험 이름">
+        <div class="ed-row">
+          <label>날짜<input class="input" type="date" id="ed-date" value="${esc(ed.date)}"></label>
+          <label>유형<select class="input select" id="ed-type">${TYPES.map(t => `<option ${t === ed.type ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+        </div>
+        <textarea class="input" id="ed-body" placeholder="기억나는 대로 자유롭게 적어 보세요. 정해진 양식은 없어요." aria-label="경험 내용">${esc(ed.body)}</textarea>
+        <div class="guide-box">
+          <div class="guide-head"><span>가이드 질문</span><small>필요한 것만 골라 답해도 돼요</small></div>
+          <div class="chips" id="ed-guide-chips">${GUIDES.map(g => `<button class="chip ${openGuides.has(g.k) ? 'on' : ''}" data-g="${g.k}">${g.label}</button>`).join('')}</div>
+          <div id="ed-guide-fields" style="display:flex;flex-direction:column;gap:10px"></div>
+          <button class="link" id="ed-ask" style="align-self:flex-start;font-size:14px">어떤 걸 써야 할지 모르겠어요</button>
+          <div id="ed-asks" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+        <div class="field"><span class="field-label">자료 첨부</span>
+          <label class="file-drop">사진이나 파일 추가<input type="file" id="ed-files" multiple hidden></label>
+          <span class="field-hint">사진은 자동으로 줄여서 저장해요. 다른 파일은 1.5MB까지 가능해요. 모든 자료는 이 브라우저에만 저장돼요.</span>
+          <div class="att-list" id="ed-att"></div>
+        </div>
+      </div>
+      <aside class="ed-side">
+        <div class="side-card">
+          <div class="field"><span class="field-label">삶에서의 중요도</span>${starsHTML('ed-imp', ed.importance)}<span class="field-hint">나에게 얼마나 소중한 경험인가요?</span></div>
+          <div class="field"><span class="field-label">성장에 미친 영향</span>${starsHTML('ed-growth', ed.growth)}<span class="field-hint">이 경험으로 얼마나 성장했다고 느끼나요?</span></div>
+        </div>
+        <div class="side-card">
+          <div class="field"><span class="field-label">태그</span><div class="chips" id="ed-tags"></div>
+            <div class="tag-input"><input class="input" id="ed-tag-in" placeholder="직접 추가 후 Enter" aria-label="태그 직접 추가"><button class="btn btn-quiet btn-sm" id="ed-tag-add">추가</button></div>
+          </div>
+          <div class="field"><span class="field-label">추천 태그</span><div class="chips" id="ed-sugg"></div><span class="field-hint">내용에서 찾은 키워드예요. 고르는 건 당신이에요.</span></div>
+        </div>
+        <div class="side-card"><div class="field"><span class="field-label">연결된 전공 분야</span><div class="chips" id="ed-cats"></div><span class="field-hint" id="ed-cats-hint"></span></div></div>
+      </aside>
+    </div>
+    <div class="sheet-foot">${src ? '<button class="btn btn-danger" id="ed-del">삭제</button>' : ''}<span class="spacer"></span><button class="btn btn-quiet" data-close>취소</button><button class="btn btn-primary" id="ed-save">${src ? '저장' : '하늘에 별 띄우기'}</button></div>`);
+
+  const textAll = () => [$('#ed-title', layer).value, $('#ed-body', layer).value, ...Object.values(ed.guide)].join(' ');
+  const drawGuides = () => {
+    $('#ed-guide-fields', layer).innerHTML = GUIDES.filter(g => openGuides.has(g.k)).map(g => `<div class="guide-field"><label for="g-${g.k}">${g.label}</label><textarea class="input" id="g-${g.k}" data-gk="${g.k}">${esc(ed.guide[g.k] || '')}</textarea></div>`).join('');
+    $$('[data-gk]', layer).forEach(t => t.oninput = () => { ed.guide[t.dataset.gk] = t.value; suggestSoon(); });
+  };
+  $$('#ed-guide-chips .chip', layer).forEach(b => b.onclick = () => {
+    const k = b.dataset.g;
+    if (openGuides.has(k)) { openGuides.delete(k); b.classList.remove('on'); } else { openGuides.add(k); b.classList.add('on'); }
+    drawGuides(); const f = $(`#g-${k}`, layer); if (f) f.focus();
+  });
+  const drawTags = () => {
+    $('#ed-tags', layer).innerHTML = ed.tags.length ? ed.tags.map(t => `<button class="chip on" data-rm="${esc(t)}" aria-label="${esc(t)} 태그 빼기">${esc(t)}<span class="x">×</span></button>`).join('') : '<span class="field-hint">아직 고른 태그가 없어요.</span>';
+    $$('[data-rm]', layer).forEach(b => b.onclick = () => { ed.tags = ed.tags.filter(t => t !== b.dataset.rm); drawTags(); drawSugg(); drawCats(); });
+  };
+  const addTag = t => { t = t.trim().replace(/^#/, ''); if (!t || ed.tags.some(x => norm(x) === norm(t))) return; const ex = allTags().find(x => norm(x.name) === norm(t)); ed.tags.push(ex ? ex.name : t); drawTags(); drawSugg(); drawCats(); };
+  const drawSugg = () => {
+    const s = extractTags(textAll()).filter(t => !ed.tags.some(x => norm(x) === norm(t))).slice(0, 8);
+    $('#ed-sugg', layer).innerHTML = s.length ? s.map(t => `<button class="chip ghost" data-add="${esc(t)}">+ ${esc(t)}</button>`).join('') : '<span class="field-hint">내용을 쓰면 여기에 추천 태그가 나타나요.</span>';
+    $$('[data-add]', layer).forEach(b => b.onclick = () => addTag(b.dataset.add));
+  };
+  let timer; const suggestSoon = () => { clearTimeout(timer); timer = setTimeout(drawSugg, 250); };
+  const drawCats = () => {
+    const auto = uniq(ed.tags.flatMap(catsForTag));
+    const on = id => (auto.includes(id) || ed.catAdd.includes(id)) && !ed.catRemove.includes(id);
+    $('#ed-cats', layer).innerHTML = state.categories.map(c => `<button class="chip ${on(c.id) ? 'on' : ''}" data-c="${c.id}">${esc(c.name)}${auto.includes(c.id) ? ' <small>자동</small>' : ''}</button>`).join('');
+    $('#ed-cats-hint', layer).innerHTML = state.categories.length ? '태그를 보고 자동으로 연결해요. 눌러서 직접 켜고 끌 수 있어요.' : '‘내 정보’에서 전공을 설정하면 경험이 분야와 자동으로 이어져요.';
+    $$('[data-c]', layer).forEach(b => b.onclick = () => {
+      const id = b.dataset.c, isAuto = auto.includes(id);
+      if (on(id)) { if (isAuto) ed.catRemove.push(id); else ed.catAdd = ed.catAdd.filter(x => x !== id); }
+      else { if (isAuto) ed.catRemove = ed.catRemove.filter(x => x !== id); else ed.catAdd.push(id); }
+      drawCats();
+    });
+  };
+  const drawAtt = () => {
+    $('#ed-att', layer).innerHTML = ed.attachments.map((a, i) => `<div class="att">${a.type.startsWith('image/') ? `<img src="${a.data}" alt="${esc(a.name)}">` : esc(a.name)}<button class="icon-btn rm" data-ai="${i}" aria-label="${esc(a.name)} 빼기">×</button></div>`).join('');
+    $$('[data-ai]', layer).forEach(b => b.onclick = () => { ed.attachments.splice(+b.dataset.ai, 1); drawAtt(); });
+  };
+  $('#ed-files', layer).onchange = async ev => {
+    for (const f of ev.target.files) {
+      try {
+        let data = await readFile(f);
+        if (f.type.startsWith('image/') && f.type !== 'image/gif' && f.type !== 'image/svg+xml') data = await shrinkImage(data);
+        else if (f.size > 1.5 * 1024 * 1024) { toast(`‘${f.name}’은(는) 1.5MB보다 커서 첨부하지 못했어요.`); continue; }
+        ed.attachments.push({ name: f.name, type: f.type.startsWith('image/') ? (f.type === 'image/gif' || f.type === 'image/svg+xml' ? f.type : 'image/jpeg') : (f.type || 'application/octet-stream'), data });
+      } catch { toast(`‘${f.name}’을(를) 읽지 못했어요.`); }
+    }
+    ev.target.value = ''; drawAtt();
+  };
+  $('#ed-ask', layer).onclick = () => {
+    const qs = guideQuestions(textAll(), ed.tags);
+    $('#ed-asks', layer).innerHTML = qs.map(q => `<button class="ask-card" data-q="${esc(q)}"><span>${esc(q)}</span><span class="add">본문에 넣기</span></button>`).join('');
+    $$('[data-q]', layer).forEach(b => b.onclick = () => {
+      const ta = $('#ed-body', layer); ta.value = (ta.value.trim() ? ta.value.replace(/\s+$/, '') + '\n\n' : '') + '— ' + b.dataset.q + '\n'; ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length; b.remove();
+    });
+  };
+  $('#ed-title', layer).oninput = suggestSoon;
+  $('#ed-body', layer).oninput = suggestSoon;
+  $('#ed-tag-in', layer).onkeydown = e => { if ((e.key === 'Enter' || e.key === ',') && !e.isComposing) { e.preventDefault(); addTag(e.target.value); e.target.value = ''; } };
+  $('#ed-tag-add', layer).onclick = () => { const i = $('#ed-tag-in', layer); addTag(i.value); i.value = ''; i.focus(); };
+  bindStars($('#ed-imp', layer), v => ed.importance = v);
+  bindStars($('#ed-growth', layer), v => ed.growth = v);
+  drawGuides(); drawTags(); drawSugg(); drawCats(); drawAtt();
+  if (!src) $('#ed-title', layer).focus();
+  const del = $('#ed-del', layer);
+  if (del) del.onclick = async () => { if (await ask(`‘${esc(src.title)}’ 기록을 삭제할까요?`, '삭제', true) && commit(() => { state.experiences = state.experiences.filter(x => x.id !== src.id); })) { closeModal(); toast('기록을 삭제했어요.'); rerender(); } };
+  $('#ed-save', layer).onclick = () => {
+    ed.title = $('#ed-title', layer).value.trim();
+    ed.date = $('#ed-date', layer).value;
+    ed.type = $('#ed-type', layer).value;
+    ed.body = $('#ed-body', layer).value.trim();
+    const guide = {}; for (const k of openGuides) if ((ed.guide[k] || '').trim()) guide[k] = ed.guide[k].trim();
+    ed.guide = guide;
+    if (!ed.title) { toast('경험의 이름을 적어 주세요.'); $('#ed-title', layer).focus(); return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(ed.date)) { toast('날짜를 골라 주세요.'); return; }
+    let realized = [];
+    const ok = commit(() => {
+      if (src) Object.assign(src, ed);
+      else { ed.id = uid(); ed.createdAt = today(); state.experiences.push(ed); }
+      const saved = src || ed;
+      for (const v of state.virtuals) if (!v.realizedAt && labelMatches(v.label, saved)) { v.realizedAt = today(); v.realizedBy = saved.id; realized.push(v.label); }
+    });
+    if (!ok) return;
+    closeModal();
+    toast(src ? '기록을 저장했어요.' : '새로운 별이 떴어요.');
+    realized.forEach(l => setTimeout(() => toast(`가상 별 ‘${l}’이(가) 실제 별이 되었어요.`), 600));
+    if (!src && view !== 'graph' && view !== 'records') go('graph'); else rerender();
+  };
+}
+function readFile(f){ return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); }); }
+async function shrinkImage(url){
+  const img = new Image(); await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+  const s = Math.min(1, 1280 / Math.max(img.width, img.height));
+  const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+  const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', .8);
+}
+
+/* ================= ABILITY ================= */
+let abMode = recall('abmode') || 'tag';
+function renderAbility(){
+  const el = $('#view-ability');
+  if (!state.experiences.length) { el.innerHTML = hero('Ability', '나의 능력치.', '') + `<div class="empty tile"><h3>능력치를 계산할 경험이 없어요.</h3><p>경험을 기록하면 어떤 역량이 쌓였는지 게임 능력치처럼 보여 드려요.</p><button class="btn btn-primary" data-new-record>경험 기록하기</button></div>`; return; }
+  if (abMode === 'cat' && !state.categories.length) abMode = 'tag';
+  const rows = abilityStats(abMode);
+  const byCount = [...rows].sort((a, b) => b.count - a.count)[0];
+  const byGrowth = [...rows].sort((a, b) => b.high - a.high || b.avg - a.avg)[0];
+  const max = Math.max(...rows.map(r => r.points), 1);
+  const top = rows.slice(0, 8);
+  let insight = `가장 자주 등장한 건 <em>${esc(byCount.name)}</em>, `;
+  insight += byGrowth.name === byCount.name ? `그리고 가장 크게 성장한 것도 <em>${esc(byGrowth.name)}</em>이에요.` : `실제로 크게 성장했다고 느낀 건 <em>${esc(byGrowth.name)}</em>이에요.`;
+  el.innerHTML = hero('Ability', '나의 능력치.', '경험의 개수만 세지 않아요. 그 경험으로 실제로 성장했다고 느낀 정도를 함께 반영해요.') + `
+    <div class="tile" id="ability-main" style="display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center">
+        <p class="insight" style="flex:1 1 380px">${insight}</p>
+        <div class="seg" role="group" aria-label="보기 방식"><button data-m="tag" aria-pressed="${abMode === 'tag'}">역량별</button><button data-m="cat" aria-pressed="${abMode === 'cat'}" ${state.categories.length ? '' : 'disabled title="내 정보에서 전공 분야를 설정해 주세요"'}>전공 분야별</button></div>
+      </div>
+      <div class="ability">
+        <div>${top.length >= 3 ? radarSVG(top.slice(0, 7), max) : `<div class="empty"><p>역량이 3개 이상 모이면 능력치 그래프가 그려져요.</p></div>`}</div>
+        <div>${top.map(r => `
+          <div class="stat-row">
+            <span class="stat-name">${esc(r.name)}</span>
+            <span class="bar" aria-hidden="true"><i style="width:${r.points / max * 100}%"></i></span>
+            <span class="stat-val">${r.points % 1 ? r.points.toFixed(1) : r.points}</span>
+            <span class="stat-sub">경험 ${r.count}개 · 그중 크게 성장 ${r.high}개 · 평균 성장 ★${r.avg.toFixed(1)}</span>
+          </div>`).join('')}
+          ${rows.length > 8 ? `<p class="field-hint" style="margin-top:8px">그 밖에 ${rows.length - 8}개 역량이 더 있어요.</p>` : ''}
+        </div>
+      </div>
+      <p class="field-hint">능력치는 그 역량이 담긴 경험들의 ‘성장에 미친 영향’ 별점을 더한 값이에요. 같은 횟수라도 크게 성장한 경험이 많을수록 높아져요. ‘크게 성장’은 성장 별점 4점 이상인 경험이에요.</p>
+    </div>`;
+  $$('#ability-main .seg button').forEach(b => b.onclick = () => { abMode = b.dataset.m; remember('abmode', abMode); renderAbility(); });
+}
+function radarSVG(rows, max){
+  const N = rows.length, R = 130, cx = 210, cy = 190;
+  const pt = (i, f) => { const a = -Math.PI / 2 + i * 2 * Math.PI / N; return [cx + Math.cos(a) * R * f, cy + Math.sin(a) * R * f]; };
+  let s = `<svg class="radar" viewBox="0 0 420 380" role="img" aria-label="능력치 레이더 차트" style="width:100%;max-width:460px;display:block;margin:auto">`;
+  for (const f of [.25, .5, .75, 1]) s += `<polygon class="grid" points="${rows.map((_, i) => pt(i, f).join(',')).join(' ')}"/>`;
+  rows.forEach((_, i) => { const [x, y] = pt(i, 1); s += `<line class="grid" x1="${cx}" y1="${cy}" x2="${x}" y2="${y}"/>`; });
+  s += `<polygon class="area" points="${rows.map((r, i) => pt(i, Math.max(.06, r.points / max)).join(',')).join(' ')}"/>`;
+  rows.forEach((r, i) => { const [x, y] = pt(i, Math.max(.06, r.points / max)); s += `<circle class="dot" cx="${x}" cy="${y}" r="4"/>`; });
+  rows.forEach((r, i) => {
+    const [x, y] = pt(i, 1.17); const anchor = Math.abs(x - cx) < 10 ? 'middle' : x > cx ? 'start' : 'end';
+    s += `<text x="${x}" y="${y + 4}" text-anchor="${anchor}" font-weight="600">${esc(r.name.length > 9 ? r.name.slice(0, 8) + '…' : r.name)}</text>`;
+  });
+  return s + '</svg>';
+}
+
+/* ================= TIMELINE ================= */
+function monthsBetween(a, b){ const out = []; let y = +a.slice(0, 4), m = +a.slice(5, 7); const ey = +b.slice(0, 4), em = +b.slice(5, 7);
+  while (y < ey || (y === ey && m <= em)) { out.push(`${y}-${String(m).padStart(2, '0')}`); m++; if (m > 12) { m = 1; y++; } } return out; }
+function renderTimeline(){
+  const el = $('#view-timeline');
+  if (!state.experiences.length) { el.innerHTML = hero('Timeline', '나는 어떻게 변해 왔을까.', '') + `<div class="empty tile"><h3>아직 그릴 시간이 없어요.</h3><p>경험이 쌓이면 어느 시기에 무엇을 했는지, 어떤 분야가 언제부터 늘었는지 보여 드려요.</p><button class="btn btn-primary" data-new-record>경험 기록하기</button></div>`; return; }
+  const list = [...state.experiences].sort((a, b) => a.date < b.date ? -1 : 1);
+  const last = list[list.length - 1].date.slice(0, 7), now = today().slice(0, 7);
+  const months = monthsBetween(list[0].date.slice(0, 7), last > now ? last : now);
+  const tagRows = allTags().sort((a, b) => b.exps.length - a.exps.length).slice(0, 5);
+  const colors = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s4)', 'var(--s5)'];
+  const series = tagRows.map(t => { let c = 0; return months.map(m => (c += t.exps.filter(e => e.date.slice(0, 7) === m).length)); });
+  const W = 920, H = 320, ml = 36, mr = 128, mt = 18, mb = 44, iw = W - ml - mr, ih = H - mt - mb;
+  const ymax = Math.max(2, ...series.flat());
+  const x = i => ml + (months.length === 1 ? iw / 2 : i * iw / (months.length - 1));
+  const y = v => mt + ih - v / ymax * ih;
+  const step = months.length > 1 ? iw / (months.length - 1) : iw;
+  let svg = `<svg class="tl-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="많이 등장한 태그 ${tagRows.length}개의 누적 경험 수 변화">`;
+  // semester bands
+  let bands = []; months.forEach((m, i) => { const s = semOf(m + '-01'); if (!bands.length || bands[bands.length - 1].key !== s.key) bands.push({ ...s, i0: i, i1: i }); else bands[bands.length - 1].i1 = i; });
+  bands.forEach((b, k) => {
+    const x0 = Math.max(ml, x(b.i0) - step / 2), x1 = Math.min(ml + iw, x(b.i1) + step / 2);
+    if (k % 2 === 0) svg += `<rect class="band" x="${x0}" y="${mt}" width="${Math.max(0, x1 - x0)}" height="${ih}"/>`;
+    if (x1 - x0 > 34) svg += `<text x="${(x0 + x1) / 2}" y="${H - 22}" text-anchor="middle">${b.short}</text>`;
+  });
+  for (let v = 0; v <= ymax; v += Math.ceil(ymax / 4)) svg += `<line class="grid" x1="${ml}" x2="${ml + iw}" y1="${y(v)}" y2="${y(v)}"/><text x="${ml - 8}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  svg += `<line class="axis" x1="${ml}" x2="${ml + iw}" y1="${mt + ih}" y2="${mt + ih}"/>`;
+  [0, months.length - 1].filter((v, i, a) => a.indexOf(v) === i).forEach(i => svg += `<text x="${x(i)}" y="${H - 6}" text-anchor="${i ? 'end' : 'start'}">${months[i].replace('-', '.')}</text>`);
+  // end labels with simple collision spreading
+  const ends = series.map((s, k) => ({ k, y: y(s[s.length - 1]) })).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 15) ends[i].y = ends[i - 1].y + 15;
+  series.forEach((s, k) => {
+    svg += `<polyline fill="none" stroke="${colors[k]}" stroke-width="2.4" stroke-linejoin="round" points="${s.map((v, i) => `${x(i)},${y(v)}`).join(' ')}"/>`;
+    svg += `<circle cx="${x(s.length - 1)}" cy="${y(s[s.length - 1])}" r="4" fill="${colors[k]}"/>`;
+    const ly = ends.find(e => e.k === k).y;
+    svg += `<text class="lbl" x="${x(s.length - 1) + 10}" y="${ly + 4}" style="fill:${colors[k]}">${esc(tagRows[k].name)} ${s[s.length - 1]}</text>`;
+  });
+  svg += '</svg>';
+  const firsts = tagRows.map(t => { const d = t.exps.map(e => e.date).sort(); const recent = t.exps.filter(e => e.date >= addMonths(today(), -12)).length;
+    return `<div><b>${esc(t.name)}</b>${fmtMonth(d[0])}에 처음 등장 · 총 ${t.exps.length}개${recent ? ` · 최근 1년 ${recent}개` : ''}</div>`; }).join('');
+  // semester cards
+  const bySem = new Map();
+  for (const e of list) { const s = semOf(e.date); if (!bySem.has(s.key)) bySem.set(s.key, { ...s, es: [] }); bySem.get(s.key).es.push(e); }
+  const sems = [...bySem.values()].sort((a, b) => b.order - a.order);
+  const busiest = [...sems].sort((a, b) => b.es.length - a.es.length)[0];
+  el.innerHTML = hero('Timeline', '나는 어떻게 변해 왔을까.', `가장 활발했던 시기는 <strong>${busiest.name}</strong>이었어요. 이때 ${busiest.es.length}개의 경험을 남겼어요.`) + `
+    <div class="tile" id="timeline-chart-wrap">
+      <h2>분야가 쌓여 온 속도</h2><p class="sub">많이 등장한 태그 ${tagRows.length}개의 누적 경험 수예요. 선이 가팔라지는 구간이 그 분야가 늘어난 시기예요.</p>
+      <div class="chart-wrap" style="margin-top:16px">${svg}</div>
+      <div class="firsts">${firsts}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2 style="font-size:28px;font-weight:700">학기별로 돌아보기</h2>
+      <div class="sems">${sems.map(s => { const tc = {}; s.es.forEach(e => e.tags.forEach(t => tc[t] = (tc[t] || 0) + 1));
+        const topT = Object.entries(tc).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+        return `<div class="sem"><h3>${s.name}</h3><div class="cnt">경험 ${s.es.length}개</div><div class="chips">${topT.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div><ul>${s.es.map(e => `<li><button data-open-exp="${e.id}"><small>${+e.date.slice(5, 7)}월</small>${esc(e.title)}</button></li>`).join('')}</ul></div>`; }).join('')}</div>
+    </div>`;
+}
+function addMonths(d, n){ const dt = new Date(+d.slice(0, 4), +d.slice(5, 7) - 1 + n, 1); return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-01`; }
+
+/* ================= GOAL GAP ================= */
+function areaStatus(area){
+  const es = state.experiences.filter(e => labelMatches(area, e));
+  const pts = es.reduce((s, e) => s + e.growth, 0);
+  const st = !es.length ? 'need' : (es.length >= 2 && pts >= 6) ? 'ok' : 'grow';
+  return { area, es, pts, st };
+}
+function renderGoal(){
+  const el = $('#view-goal'), g = state.goal;
+  const res = g.areas.map(areaStatus);
+  const okN = res.filter(r => r.st === 'ok').length, growN = res.filter(r => r.st === 'grow').length;
+  const hasVirt = a => state.virtuals.some(v => !v.realizedAt && norm(v.label) === norm(a));
+  const ring = () => { const n = res.length || 1, C = 2 * Math.PI * 34, a = okN / n * C, b = growN / n * C;
+    return `<svg width="88" height="88" viewBox="0 0 88 88" aria-hidden="true"><circle cx="44" cy="44" r="34" fill="none" stroke="var(--chip)" stroke-width="10"/>
+      <circle cx="44" cy="44" r="34" fill="none" stroke="var(--ok)" stroke-width="10" stroke-dasharray="${a} ${C}" transform="rotate(-90 44 44)"/>
+      <circle cx="44" cy="44" r="34" fill="none" stroke="var(--star-on)" stroke-width="10" stroke-dasharray="${b} ${C}" stroke-dashoffset="${-a}" transform="rotate(-90 44 44)"/></svg>`; };
+  const vs = [...state.virtuals].sort((a, b) => (a.realizedAt ? 1 : 0) - (b.realizedAt ? 1 : 0));
+  el.innerHTML = hero('Goal Gap', '목표까지, 무엇이 남았을까.', '목표와 그 목표에 필요한 영역을 직접 적어 주세요. 지금까지의 경험과 비교해 충분한 곳과 아직 비어 있는 곳을 보여 드려요.') + `
+    <div class="grid-2">
+      <div class="tile goal-form">
+        <label class="field"><span class="field-label">나의 목표</span><input class="goal-name" id="goal-name" placeholder="예: Data Analyst" value="${esc(g.name)}"></label>
+        <div class="field"><span class="field-label">필요한 영역</span>
+          <div class="chips" id="goal-areas">${g.areas.map(a => `<button class="chip on" data-rm-area="${esc(a)}" aria-label="${esc(a)} 빼기">${esc(a)}<span class="x">×</span></button>`).join('') || '<span class="field-hint">아직 영역이 없어요.</span>'}</div>
+          <div class="tag-input"><input class="input" id="goal-area-in" placeholder="영역을 적고 Enter (예: SQL, 통계)"><button class="btn btn-quiet btn-sm" id="goal-area-add">추가</button></div>
+          ${allTags().length ? `<span class="field-hint">내 태그에서 고르기</span><div class="chips">${allTags().filter(t => !g.areas.some(a => norm(a) === norm(t.name))).slice(0, 14).map(t => `<button class="chip ghost" data-add-area="${esc(t.name)}">+ ${esc(t.name)}</button>`).join('')}</div>` : ''}
+        </div>
+      </div>
+      <div class="tile" id="goal-results" style="display:flex;flex-direction:column;gap:16px">
+        ${!g.areas.length ? `<div class="empty"><h3>목표를 세워 볼까요?</h3><p>왼쪽에 목표와 필요한 영역을 적으면 이곳에 비교 결과가 나타나요.</p></div>` : `
+        <div class="cover">${ring()}<div><h2>${esc(g.name || '나의 목표')}</h2><p class="sub">${res.length}개 영역 중 ${okN}개는 충분하고, ${growN}개는 쌓아 가는 중이에요.</p></div></div>
+        <div class="gap-list">${res.map(r => `
+          <div class="gap-row">
+            <span class="pill ${r.st}">${r.st === 'ok' ? '충분해요' : r.st === 'grow' ? '쌓는 중' : '필요해요'}</span>
+            <div><div class="t">${r.st === 'need' ? `${esc(r.area)} 경험 필요` : r.st === 'grow' ? `${esc(r.area)} 경험을 조금 더` : esc(r.area)}</div>
+              <div class="d">${r.es.length ? `관련 경험 ${r.es.length}개 · ${r.es.slice(0, 2).map(e => esc(e.title)).join(', ')}${r.es.length > 2 ? ' 외' : ''}` : '아직 관련된 기록이 없어요.'}</div></div>
+            ${r.st === 'ok' ? '' : hasVirt(r.area) ? '<span class="pill virt">가상 별 있음</span>' : `<button class="btn btn-secondary btn-sm" data-virt="${esc(r.area)}">가상 별로</button>`}
+          </div>`).join('')}</div>`}
+      </div>
+    </div>
+    <div class="tile" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+        <div><h2>가상 별</h2><p class="sub">앞으로 채우고 싶은 경험이에요. 같은 이름의 태그가 달린 경험을 기록하면 자동으로 실제 별이 돼요.</p></div>
+        <button class="btn btn-primary btn-sm" id="goal-add-virt">+ 가상 별 추가</button>
+      </div>
+      <div class="vlist">${vs.length ? vs.map(v => `
+        <div class="vrow"><span class="vdot ${v.realizedAt ? 'real' : ''}" aria-hidden="true"></span>
+          <span class="nm">${esc(v.label)}</span>
+          <span class="field-hint">${v.realizedAt ? `${fmtDate(v.realizedAt)}에 채워짐${expById(v.realizedBy) ? ` · ${esc(expById(v.realizedBy).title)}` : ''}` : `${fmtDate(v.createdAt)}에 추가${v.links.length ? ` · ${v.links.map(esc).join(', ')}와(과) 연결` : ''}`}</span>
+          ${v.realizedAt ? '<span class="pill ok">채웠어요</span>' : `<button class="btn btn-secondary btn-sm" data-fill="${v.id}">기록하기</button>`}
+          <button class="link" data-del-virt="${v.id}" style="font-size:13px;color:var(--fg-3)">삭제</button>
+        </div>`).join('') : '<p class="field-hint">아직 가상 별이 없어요. 위에서 ‘필요해요’로 나온 영역을 가상 별로 띄워 보세요.</p>'}</div>
+    </div>`;
+  const saveGoal = () => commit(() => {});
+  $('#goal-name').onchange = e => { g.name = e.target.value.trim(); saveGoal(); renderGoal(); };
+  const addArea = v => { v = v.trim(); if (!v || g.areas.some(a => norm(a) === norm(v))) return; g.areas.push(v); saveGoal(); renderGoal(); const i = $('#goal-area-in'); if (i) i.focus(); };
+  $('#goal-area-in').onkeydown = e => { if ((e.key === 'Enter' || e.key === ',') && !e.isComposing) { e.preventDefault(); addArea(e.target.value); } };
+  $('#goal-area-add').onclick = () => addArea($('#goal-area-in').value);
+  $$('[data-add-area]').forEach(b => b.onclick = () => addArea(b.dataset.addArea));
+  $$('[data-rm-area]').forEach(b => b.onclick = () => { g.areas = g.areas.filter(a => a !== b.dataset.rmArea); saveGoal(); renderGoal(); });
+  $$('[data-virt]').forEach(b => b.onclick = () => { const l = b.dataset.virt; const links = allTags().filter(t => catsForTag(t.name).some(c => catsForTag(l).includes(c))).slice(0, 3).map(t => t.name);
+    if (commit(() => state.virtuals.push({ id: uid(), label: l, links, createdAt: today(), realizedAt: null, realizedBy: null }))) { toast(`가상 별 ‘${l}’을(를) 별자리에 띄웠어요.`); renderGoal(); } });
+  $('#goal-add-virt').onclick = () => openVirtualForm();
+  $$('[data-fill]').forEach(b => b.onclick = () => { const v = state.virtuals.find(x => x.id === b.dataset.fill); openEditor(null, { tags: [v.label] }); });
+  $$('[data-del-virt]').forEach(b => b.onclick = async () => { const v = state.virtuals.find(x => x.id === b.dataset.delVirt);
+    if (await ask(`가상 별 ‘${esc(v.label)}’을(를) 삭제할까요?`, '삭제', true) && commit(() => { state.virtuals = state.virtuals.filter(x => x.id !== v.id); })) renderGoal(); });
+}
+
+/* ================= SUMMARY ================= */
+const MIN_SUMMARY = 3;
+function analysisText(){
+  const es = state.experiences, n = es.length, out = [];
+  const catRows = state.categories.map(c => ({ c, n: es.filter(e => catsForExp(e).includes(c.id)).length })).sort((a, b) => b.n - a.n);
+  const tags = allTags().sort((a, b) => b.exps.length - a.exps.length);
+  const used = catRows.filter(r => r.n);
+  if (used.length >= 2) out.push(`지금까지 기록된 ${n}개의 경험에서는 <mark>${esc(used[0].c.name)}</mark>${hasBatchim(used[0].c.name) ? '과' : '와'} <mark>${esc(used[1].c.name)}</mark> 분야가 반복적으로 나타나요.`);
+  else if (tags.length >= 2) out.push(`지금까지 기록된 ${n}개의 경험에서는 <mark>${esc(tags[0].name)}</mark>${hasBatchim(tags[0].name) ? '과' : '와'} <mark>${esc(tags[1].name)}</mark>${hasBatchim(tags[1].name) ? '이' : '가'} 가장 자주 나타나요.`);
+  const lead = tags.find(t => norm(t.name) === norm('리더십'));
+  if (lead && lead.exps.length >= 2) {
+    const types = {}; lead.exps.forEach(e => types[e.type] = (types[e.type] || 0) + 1);
+    const tp = Object.entries(types).sort((a, b) => b[1] - a[1])[0][0];
+    out.push(`특히 ${esc(tp)} 같은 활동에서 팀을 이끄는 역할이 자주 보여요.`);
+  }
+  const strong = abilityStats('tag').filter(r => r.count >= 2).sort((a, b) => b.high / b.count - a.high / a.count || b.points - a.points)[0];
+  if (strong && strong.high) out.push(`<mark>${esc(strong.name)}</mark>${hasBatchim(strong.name) ? '은' : '는'} 경험 ${strong.count}개 중 ${strong.high}개에서 크게 성장했다고 느끼셨어요.`);
+  const dear = es.filter(e => e.importance - e.growth >= 2).sort((a, b) => b.importance - a.importance)[0];
+  if (dear) out.push(`‘${esc(dear.title)}’처럼 역량보다 삶에서 소중했던 경험도 당신의 별자리를 이루고 있어요.`);
+  const recent = addMonths(today(), -6), before = new Set(es.filter(e => e.date < recent).flatMap(e => e.tags.map(norm)));
+  const fresh = uniq(es.filter(e => e.date >= recent).flatMap(e => e.tags).filter(t => !before.has(norm(t))));
+  if (fresh.length) out.push(`최근 6개월 사이에는 <mark>${fresh.slice(0, 2).map(esc).join(', ')}</mark> 경험이 새롭게 등장했어요.`);
+  if (catRows.length >= 2) { const low = catRows[catRows.length - 1]; if (low.n < used[0]?.n) out.push(`반면 <mark>${esc(low.c.name)}</mark> 관련 경험은 ${low.n ? '상대적으로 적게' : '아직'} 나타나요.`); }
+  return out.join(' ');
+}
+function renderSummary(){
+  const el = $('#view-summary'), es = state.experiences, n = es.length;
+  if (n < MIN_SUMMARY) { el.innerHTML = hero('Summary', '그동안의 나.', '') + `<div class="empty tile" id="analysis-card"><h3>경험을 ${MIN_SUMMARY}개 이상 기록하면 요약이 열려요.</h3><p>지금 ${n}개를 기록했어요. ${MIN_SUMMARY - n}개만 더 남겨 보세요.</p><button class="btn btn-primary" data-new-record>경험 기록하기</button></div>`; return; }
+  const tags = allTags().sort((a, b) => b.exps.length - a.exps.length);
+  const months = new Set(es.map(e => e.date.slice(0, 7))).size;
+  const sorted = [...es].sort((a, b) => a.date < b.date ? -1 : 1);
+  const span = monthsBetween(sorted[0].date.slice(0, 7), sorted[n - 1].date.slice(0, 7)).length;
+  const catRows = state.categories.map(c => ({ c, n: es.filter(e => catsForExp(e).includes(c.id)).length })).sort((a, b) => b.n - a.n);
+  const cmax = Math.max(1, ...catRows.map(r => r.n));
+  const types = {}; es.forEach(e => types[e.type] = (types[e.type] || 0) + 1);
+  const growthTop = [...es].sort((a, b) => b.growth - a.growth || b.importance - a.importance).slice(0, 3);
+  const dearTop = [...es].sort((a, b) => b.importance - a.importance || b.growth - a.growth).slice(0, 3);
+  const tmax = tags[0]?.exps.length || 1;
+  el.innerHTML = hero('Summary', '그동안의 나.', `${span}개월 동안 ${n}개의 경험을 쌓았어요. 생각보다 많이 해 왔죠?`) + `
+    <div class="tiles">
+      <div class="num-tile"><span class="n">${n}<small>개</small></span><span class="l">기록한 경험</span></div>
+      <div class="num-tile"><span class="n">${tags.length}<small>개</small></span><span class="l">등장한 태그</span></div>
+      <div class="num-tile"><span class="n">${Object.keys(types).length}<small>종류</small></span><span class="l">활동 유형</span></div>
+      <div class="num-tile"><span class="n">${months}<small>개월</small></span><span class="l">경험을 남긴 달</span></div>
+    </div>
+    <div class="grid-2">
+      <div class="tile"><h2>나를 성장시킨 경험</h2><p class="sub">성장에 미친 영향이 큰 순서예요.</p>
+        <ol class="rank">${growthTop.map((e, i) => `<li><span class="no">${i + 1}</span><button data-open-exp="${e.id}">${esc(e.title)}</button>${miniStars('', e.growth)}</li>`).join('')}</ol></div>
+      <div class="tile"><h2>나에게 소중한 경험</h2><p class="sub">삶에서의 중요도가 큰 순서예요.</p>
+        <ol class="rank">${dearTop.map((e, i) => `<li><span class="no">${i + 1}</span><button data-open-exp="${e.id}">${esc(e.title)}</button>${miniStars('', e.importance)}</li>`).join('')}</ol></div>
+    </div>
+    <div class="grid-2">
+      <div class="tile"><h2>많이 등장한 태그</h2>
+        <div class="cloud">${tags.slice(0, 16).map(t => `<span style="font-size:${14 + t.exps.length / tmax * 22}px;opacity:${.55 + t.exps.length / tmax * .45}">${esc(t.name)}<small>${t.exps.length}</small></span>`).join('')}</div></div>
+      <div class="tile"><h2>경험한 주요 분야</h2>
+        ${catRows.length ? `<div style="margin-top:12px">${catRows.map(r => `<div class="stat-row"><span class="stat-name">${esc(r.c.name)}</span><span class="bar"><i style="width:${r.n / cmax * 100}%"></i></span><span class="stat-val">${r.n}</span></div>`).join('')}</div>`
+          : `<p class="sub" style="margin-top:12px">‘내 정보’에서 전공을 설정하면 분야별 분포를 볼 수 있어요.</p>`}
+        <div class="chips" style="margin-top:16px">${Object.entries(types).sort((a, b) => b[1] - a[1]).map(([t, c]) => `<span class="chip">${esc(t)} ${c}</span>`).join('')}</div></div>
+    </div>
+    <div class="analysis" id="analysis-card">
+      <span class="eyebrow">분석 결과</span>
+      <p class="txt">${analysisText() || '경험이 더 쌓이면 반복되는 흐름을 찾아 드릴게요.'}</p>
+      <p class="note">이 분석은 당신을 규정하지 않아요. 지금까지의 기록에서 보이는 흐름일 뿐, 앞으로의 기록에 따라 얼마든지 달라질 수 있어요.</p>
+    </div>`;
+}
+
+/* ================= ME / SETTINGS ================= */
+const downloadsP = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null);
+function renderMe(){
+  const el = $('#view-me'), p = state.profile;
+  const tags = allTags().sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+  el.innerHTML = hero('내 정보', '나를 이루는 분야.', '전공과 분야를 정하면 경험의 태그가 분야와 자동으로 이어져요. 어떻게 나눌지는 당신이 정해요.') + `
+    <div class="tile" style="display:flex;flex-direction:column;gap:18px">
+      <h2>프로필</h2>
+      <div class="set-row"><label>이름 또는 닉네임<input class="input" id="me-name" value="${esc(p.name)}" placeholder="예: 한별"></label></div>
+      <div class="set-row">
+        <label>주전공<input class="input" id="me-m1" value="${esc(p.majors.find(m => m.role === '주전공')?.name || '')}" placeholder="예: 디지털경영"></label>
+        <label>이중전공 · 부전공 (선택)<input class="input" id="me-m2" value="${esc(p.majors.find(m => m.role === '이중전공')?.name || '')}" placeholder="예: 산업경영공학"></label>
+      </div>
+      <div><button class="btn btn-primary btn-sm" id="me-save">저장</button></div>
+    </div>
+    <div class="tile">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><div><h2>전공 분야</h2><p class="sub">별자리에서 고리 모양의 큰 별이 돼요. 전공 하나를 그대로 쓰거나 ‘산업·경영·공학’처럼 나눌 수 있어요.</p></div><button class="btn btn-secondary btn-sm" id="me-add-cat">+ 분야 추가</button></div>
+      <div id="me-cats" style="margin-top:12px">${state.categories.length ? state.categories.map(c => `
+        <div class="cat-row" data-cat="${c.id}">
+          <div class="cat-head"><input class="input" data-cname value="${esc(c.name)}" aria-label="분야 이름"><span class="grp">${esc(c.group || '')}</span>
+            ${p.majors.some(m => m.name === c.group) && state.categories.filter(x => x.group === c.group).length === 1 ? `<button class="btn btn-quiet btn-sm" data-split>세부 분야로 나누기</button>` : ''}
+            <button class="link" data-cdel style="color:var(--need);font-size:14px">삭제</button></div>
+          <div class="field-hint">연결 키워드 · 이 단어와 같은 태그가 자동으로 이 분야에 이어져요.</div>
+          <div class="chips">${c.keywords.map(k => `<button class="chip" data-krm="${esc(k)}" aria-label="${esc(k)} 빼기">${esc(k)}<span class="x">×</span></button>`).join('')}
+            <input class="input" data-kin placeholder="키워드 추가 후 Enter" style="padding:4px 10px;font-size:13px;width:150px" aria-label="키워드 추가"></div>
+        </div>`).join('') : `<p class="field-hint">아직 분야가 없어요. 위에서 전공을 저장하면 자동으로 만들어져요.</p>`}</div>
+    </div>
+    ${tags.length && state.categories.length ? `<div class="tile"><h2>태그와 분야 연결</h2><p class="sub">자동으로 연결된 결과예요. 눌러서 직접 바꿀 수 있어요.</p>
+      <div class="map-wrap" style="margin-top:12px"><table class="map-table"><tbody>${tags.map(t => { const on = catsForTag(t.name); const ov = Array.isArray(state.tagCats[t.name]);
+        return `<tr><td>${esc(t.name)}</td><td><div class="chips">${state.categories.map(c => `<button class="chip ${on.includes(c.id) ? 'on' : ''}" data-map-tag="${esc(t.name)}" data-map-cat="${c.id}">${esc(c.name)}</button>`).join('')}${ov ? `<button class="link" data-map-auto="${esc(t.name)}" style="font-size:13px">자동으로 되돌리기</button>` : ''}</div></td></tr>`; }).join('')}</tbody></table></div></div>` : ''}
+    <div class="grid-2">
+      <div class="tile" style="display:flex;flex-direction:column;gap:12px"><h2>백업</h2>
+        <p class="sub">기록은 이 브라우저에만 저장돼요. 다른 기기로 옮기거나 혹시 모를 상황에 대비해 파일로 내보내 두세요.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="me-export">내보내기</button><label class="btn btn-secondary btn-sm" style="cursor:pointer">불러오기<input type="file" id="me-import" accept=".json,application/json" hidden></label></div>
+        <div id="me-export-box" hidden><textarea class="input" id="me-export-text" rows="5" readonly style="font-size:12px;font-family:ui-monospace,Menlo,monospace" aria-label="백업 데이터"></textarea><button class="btn btn-quiet btn-sm" id="me-copy" style="margin-top:8px">복사하기</button><p class="field-hint" style="margin-top:6px">이 화면에서는 파일 저장이 막혀 있어요. 위 내용을 복사해 메모장에 .json 파일로 저장해 두세요.</p></div>
+      </div>
+      <div class="tile" style="display:flex;flex-direction:column;gap:12px"><h2>도움말과 초기화</h2>
+        <p class="sub">튜토리얼은 예시 학생의 별자리로 진행돼요. 내 기록은 그대로 남아요.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary btn-sm" id="me-tour">튜토리얼 다시 보기</button><button class="btn btn-danger btn-sm" id="me-reset">모든 기록 지우기</button></div>
+      </div>
+    </div>`;
+  $('#me-save').onclick = () => {
+    const name = $('#me-name').value.trim(), m1 = $('#me-m1').value.trim(), m2 = $('#me-m2').value.trim();
+    if (commit(() => applyProfile(name, m1, m2))) { toast('저장했어요.'); renderMe(); }
+  };
+  $('#me-add-cat').onclick = () => { if (commit(() => state.categories.push({ id: uid(), name: '새 분야', group: '직접 추가', keywords: [] }))) { renderMe(); const ins = $$('[data-cname]'); ins[ins.length - 1]?.select(); } };
+  $$('[data-cat]').forEach(row => {
+    const c = catById(row.dataset.cat);
+    $('[data-cname]', row).onchange = e => { const v = e.target.value.trim(); if (!v) { e.target.value = c.name; return; } commit(() => { c.name = v; c.keywords = uniq(c.keywords.concat(hintKeywords(v))); }); renderMe(); };
+    $('[data-cdel]', row).onclick = async () => { if (await ask(`‘${esc(c.name)}’ 분야를 삭제할까요? 경험 기록은 지워지지 않아요.`, '삭제', true) && commit(() => { state.categories = state.categories.filter(x => x.id !== c.id); })) renderMe(); };
+    const sp = $('[data-split]', row); if (sp) sp.onclick = () => openSplit(c);
+    $$('[data-krm]', row).forEach(b => b.onclick = () => { commit(() => { c.keywords = c.keywords.filter(k => k !== b.dataset.krm); }); renderMe(); });
+    $('[data-kin]', row).onkeydown = e => { if ((e.key === 'Enter' || e.key === ',') && !e.isComposing) { e.preventDefault(); const v = e.target.value.trim(); if (v && !c.keywords.some(k => norm(k) === norm(v))) { commit(() => c.keywords.push(v)); renderMe(); } } };
+  });
+  $$('[data-map-tag]').forEach(b => b.onclick = () => {
+    const t = b.dataset.mapTag, id = b.dataset.mapCat, cur = catsForTag(t);
+    commit(() => { state.tagCats[t] = cur.includes(id) ? cur.filter(x => x !== id) : cur.concat(id); }); renderMe();
+  });
+  $$('[data-map-auto]').forEach(b => b.onclick = () => { commit(() => { delete state.tagCats[b.dataset.mapAuto]; }); renderMe(); });
+  $('#me-export').onclick = exportData;
+  $('#me-copy').onclick = () => { const ta = $('#me-export-text'); navigator.clipboard?.writeText(ta.value).then(() => toast('복사했어요.'), () => { ta.select(); toast('선택된 내용을 Ctrl+C로 복사해 주세요.'); }) ?? (ta.select(), toast('선택된 내용을 Ctrl+C로 복사해 주세요.')); };
+  $('#me-import').onchange = importData;
+  $('#me-tour').onclick = () => startTour(false);
+  $('#me-reset').onclick = async () => {
+    if (!await ask('모든 기록, 목표, 가상 별, 분야 설정을 지울까요? 되돌릴 수 없어요.', '모두 지우기', true)) return;
+    commit(() => { state = { ...emptyState(), tutorialDone: true }; }); posCache.clear(); toast('모든 기록을 지웠어요.'); go('graph');
+  };
+}
+function applyProfile(name, m1, m2){
+  const p = state.profile; p.name = name;
+  const old = p.majors.map(m => m.name);
+  p.majors = [m1 && { name: m1, role: '주전공' }, m2 && { name: m2, role: '이중전공' }].filter(Boolean);
+  for (const m of p.majors) if (!old.includes(m.name) && !state.categories.some(c => c.group === m.name)) state.categories.push({ id: uid(), name: m.name, group: m.name, keywords: hintKeywords(m.name) });
+}
+function openSplit(c){
+  const layer = openModal(`
+    <div class="sheet-head"><h2>‘${esc(c.name)}’ 나누기</h2><button class="icon-btn" data-close aria-label="닫기">×</button></div>
+    <div class="sheet-body" style="display:flex;flex-direction:column;gap:12px">
+      <p style="color:var(--fg-2);font-size:15px">세부 분야를 쉼표로 구분해 적어 주세요. 각각이 별자리의 큰 별이 돼요.</p>
+      <input class="input" id="sp-in" placeholder="예: 산업, 경영, 공학">
+    </div>
+    <div class="sheet-foot"><button class="btn btn-quiet" data-close>취소</button><button class="btn btn-primary" id="sp-ok">나누기</button></div>`, 'narrow');
+  $('#sp-in', layer).focus();
+  $('#sp-ok', layer).onclick = () => {
+    const parts = uniq($('#sp-in', layer).value.split(/[,·、/]/).map(s => s.trim()).filter(Boolean));
+    if (parts.length < 2) { toast('두 개 이상으로 나눠 주세요.'); return; }
+    if (commit(() => { const i = state.categories.indexOf(c); state.categories.splice(i, 1, ...parts.map(n => ({ id: uid(), name: n, group: c.group, keywords: hintKeywords(n) }))); })) { closeModal(); toast(`${parts.length}개 분야로 나눴어요.`); renderMe(); }
+  };
+}
+async function exportData(){
+  const data = JSON.stringify(state, null, 1);
+  const name = `너의별자리_백업_${today()}.json`;
+  const dl = await downloadsP;
+  if (dl) {
+    try { await dl.save({ filename: name, data }); toast('백업 파일을 저장했어요.'); return; }
+    catch (e) { if (e && e.code === 'declined') { toast('저장을 취소했어요.'); return; } if (e && e.code === 'rate_limited') { toast('잠시 후 다시 시도해 주세요.'); return; } }
+  }
+  $('#me-export-box').hidden = false; $('#me-export-text').value = data; $('#me-export-text').select();
+}
+async function importData(ev){
+  const f = ev.target.files[0]; ev.target.value = ''; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!d || !Array.isArray(d.experiences) || !d.profile) throw 0;
+    if (!await ask(`이 파일의 경험 ${d.experiences.length}개로 지금 기록을 바꿀까요? 지금 기록은 사라져요.`, '불러오기')) return;
+    const merged = { ...emptyState(), ...d, tutorialDone: true };
+    if (commit(() => { state = merged; })) { posCache.clear(); toast('백업을 불러왔어요.'); go('graph'); }
+  } catch { toast('백업 파일을 읽지 못했어요. 이 서비스에서 내보낸 .json 파일인지 확인해 주세요.'); }
+}
+
+/* ================= ONBOARDING ================= */
+function openOnboarding(){
+  const layer = openModal(`
+    <div class="sheet-head"><h2>당신의 하늘을 준비할게요.</h2><button class="icon-btn" data-close aria-label="닫기">×</button></div>
+    <div class="sheet-body" style="display:flex;flex-direction:column;gap:16px">
+      <p style="color:var(--fg-2);font-size:15px">전공을 알려 주면 경험이 전공 분야와 자동으로 이어져요. 나중에 ‘내 정보’에서 언제든 바꿀 수 있어요.</p>
+      <label class="field"><span class="field-label">이름 또는 닉네임</span><input class="input" id="ob-name" placeholder="예: 한별"></label>
+      <label class="field"><span class="field-label">주전공</span><input class="input" id="ob-m1" placeholder="예: 디지털경영"></label>
+      <label class="field"><span class="field-label">이중전공 · 부전공 (선택)</span><input class="input" id="ob-m2" placeholder="예: 산업경영공학"></label>
+      <p class="field-hint">전공을 ‘산업·경영·공학’처럼 더 잘게 나누고 싶다면 ‘내 정보’에서 나눌 수 있어요.</p>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-quiet" data-close>나중에 할게요</button><button class="btn btn-primary" id="ob-ok">시작하기</button></div>`, 'narrow');
+  $('#ob-name', layer).focus();
+  $('#ob-ok', layer).onclick = () => {
+    if (commit(() => applyProfile($('#ob-name', layer).value.trim(), $('#ob-m1', layer).value.trim(), $('#ob-m2', layer).value.trim()))) { closeModal(); go('graph'); toast('준비됐어요. 이제 첫 경험을 기록해 보세요.'); }
+  };
+}
+
+/* ================= TOUR ================= */
+const TOUR = [
+  { title:'너의 별자리는?', text:'지금까지 무엇을 해 왔는지, 나는 어떤 사람인지, 앞으로 무엇을 채워야 하는지 스스로 발견하는 경험 기록 서비스예요. 예시 학생 ‘한별’의 별자리로 먼저 둘러볼게요.' },
+  { view:'graph', target:'#graph', title:'경험이 별이 돼요', text:'기록한 경험은 밝은 별, 경험에서 나온 태그는 작은 푸른 별이 돼요. 같은 태그를 가진 경험끼리 자연스럽게 이어져 별자리가 생겨요. 별을 눌러 보거나 끌어서 움직일 수 있어요.' },
+  { view:'graph', target:'#graph-legend', title:'별의 크기와 모양', text:'삶에서의 중요도와 성장에 미친 영향이 클수록 별이 커져요. 고리 모양은 전공 분야, 점선 별은 앞으로 채우고 싶은 가상 별이에요.' },
+  { view:'graph', target:'#btn-record', title:'언제든 기록하기', text:'정해진 양식 없이 자유롭게 쓰면 돼요. 내용에서 태그를 추천하고, 막힐 때는 생각을 돕는 질문을 건네요. 어떤 태그를 달지는 당신이 정해요.' },
+  { view:'records', target:'#records-grid', title:'모든 기록을 한곳에', text:'쌓인 경험을 검색하고, 중요도나 성장 순으로 다시 볼 수 있어요.' },
+  { view:'ability', target:'#ability-main', title:'능력치', text:'경험의 개수가 아니라 실제로 성장했다고 느낀 정도를 더해 계산해요. 자주 한 것과 크게 성장한 것이 다를 수도 있어요.' },
+  { view:'timeline', target:'#timeline-chart-wrap', title:'타임라인', text:'어느 시기에 어떤 활동을 집중적으로 했는지, 어떤 분야가 언제부터 늘었는지 보여 줘요.' },
+  { view:'goal', target:'#goal-results', title:'목표와 가상 별', text:'목표와 필요한 영역을 직접 적으면 지금의 경험과 비교해 줘요. 비어 있는 영역은 가상 별로 띄우고, 실제 경험을 기록하면 자동으로 채워져요.' },
+  { view:'summary', target:'#analysis-card', title:'분석 결과', text:'경험이 쌓이면 활동 요약과 함께 반복되는 흐름을 짧게 정리해 드려요. 당신을 규정하지 않고, 기록에서 보이는 패턴만 설명해요.' },
+  { title:'이제 당신 차례예요.', text:'예시 데이터를 지우고 빈 하늘에서 시작할게요. 첫 번째 별은 무엇이 될까요?', last:true },
+];
+let tourI = 0, tourFresh = false;
+function startTour(fresh){
+  tourFresh = fresh;
+  realState = fresh ? null : state;
+  demo = true; state = makeSample(); posCache.clear(); zoomT = null; panelNode = null;
+  closeModal(); tourI = 0;
+  $('#tour-root').innerHTML = `<div class="tour" role="dialog" aria-modal="true" aria-labelledby="tour-title"><div class="tour-spot" id="tour-spot"></div><div class="tour-card" id="tour-card"></div></div>`;
+  showStep();
+}
+function showStep(){
+  const s = TOUR[tourI];
+  if (s.view && s.view !== view) go(s.view);
+  else if (!s.view && view !== 'graph') go('graph');
+  const card = $('#tour-card'), spot = $('#tour-spot');
+  card.innerHTML = `<h3 id="tour-title">${s.title}</h3><p>${s.text}</p><div class="tour-foot"><span class="prog">${tourI + 1} / ${TOUR.length}</span>
+    ${s.last ? '' : '<button class="link" id="t-skip" style="font-size:14px;color:var(--fg-3)">건너뛰기</button>'}
+    ${tourI ? '<button class="btn btn-quiet btn-sm" id="t-prev">이전</button>' : ''}
+    <button class="btn btn-primary btn-sm" id="t-next">${s.last ? (tourFresh ? '내 별자리 시작하기' : '돌아가기') : tourI ? '다음' : '둘러보기'}</button></div>`;
+  $('#t-next').onclick = () => s.last ? endTour() : (tourI++, showStep());
+  const pv = $('#t-prev'); if (pv) pv.onclick = () => { tourI--; showStep(); };
+  const sk = $('#t-skip'); if (sk) sk.onclick = endTour;
+  $('#t-next').focus();
+  setTimeout(placeStep, 60);
+}
+function placeStep(){
+  const s = TOUR[tourI], card = $('#tour-card'), spot = $('#tour-spot'); if (!card) return;
+  const vw = innerWidth, vh = innerHeight, cw = card.offsetWidth, ch = card.offsetHeight;
+  const t = s.target && $(s.target);
+  if (!t) { spot.style.cssText = `top:${vh / 2}px;left:${vw / 2}px;width:0;height:0`; card.style.top = (vh - ch) / 2 + 'px'; card.style.left = (vw - cw) / 2 + 'px'; return; }
+  const r0 = t.getBoundingClientRect();
+  if (r0.top < 60 || r0.bottom > vh) { window.scrollTo({ top: scrollY + r0.top - 80 }); }
+  const r = t.getBoundingClientRect(), pad = 8;
+  const top = Math.max(4, r.top - pad), bottom = Math.min(vh - 4, r.bottom + pad);
+  spot.style.cssText = `top:${top}px;left:${r.left - pad}px;width:${r.width + pad * 2}px;height:${bottom - top}px`;
+  let ct, cl = clamp(r.left + r.width / 2 - cw / 2, 16, vw - cw - 16);
+  if (bottom + ch + 16 < vh) ct = bottom + 12;
+  else if (top - ch - 16 > 0) ct = top - ch - 12;
+  else { ct = vh - ch - 24; cl = clamp(r.right - cw - 24, 16, vw - cw - 16); }
+  card.style.top = ct + 'px'; card.style.left = cl + 'px';
+}
+addEventListener('resize', () => { if ($('#tour-card')) placeStep(); });
+function endTour(){
+  $('#tour-root').innerHTML = '';
+  demo = false; posCache.clear(); zoomT = null; panelNode = null;
+  state = realState || emptyState(); realState = null;
+  state.tutorialDone = true; save();
+  go('graph');
+  if (tourFresh && !state.profile.name && !state.categories.length) openOnboarding();
+}
+
+/* ================= BOOT ================= */
+if (!storageOK) $('#storage-banner').hidden = false;
+const saved = load();
+if (saved && saved.tutorialDone) {
+  state = { ...emptyState(), ...saved };
+  const v = recall('view'); go(RENDER[v] ? v : 'graph');
+} else {
+  if (saved) state = { ...emptyState(), ...saved };
+  go('graph');
+  startTour(!saved || !saved.experiences?.length);
+  if (saved && saved.experiences?.length) realState = { ...emptyState(), ...saved };
+}
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (view === 'graph') drawGraph(); }, 200); });
+})();
+</script>
+
+</body>
+</html>
