@@ -752,7 +752,7 @@ function renderGraphView(){
     <div class="sl-grid">${LIGHT_LEGEND.map(([name, k]) => `<div class="sl-chip"><i style="background:${STARLIGHT[k][0]};box-shadow:0 0 10px ${STARLIGHT[k][0]}"></i><span style="color:${STARLIGHT[k][1]}">${name}</span></div>`).join('')}</div>
     <div class="sl-marks">
       <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>선택한 별</span>
-      <span><svg width="22" height="10" viewBox="0 0 22 10" aria-hidden="true"><line x1="1" y1="5" x2="21" y2="5" stroke="#34a866" stroke-width="2" stroke-dasharray="3 2"/></svg>방금 기록한 별 (다시 열면 사라져요)</span>
+      <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#6aa8ff" fill-opacity=".25"/><circle cx="8" cy="8" r="3" fill="#6aa8ff"/></svg>더 크게 반짝이는 별 = 방금 기록한 별</span>
       <span><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><ellipse cx="7" cy="8" rx="4.5" ry="6.5" fill="none" stroke="#5b8fd6" stroke-width="1.8" transform="rotate(25 7 8)"/></svg>관측 예정 별</span>
       <span><svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="3" fill="#8e97ad"/></svg>작은 회색 별 = 태그</span>
       <span>은은한 빛 속 큰 글자 = 전공 분야</span>
@@ -837,12 +837,6 @@ function drawGraph(){
       s.append('circle').attr('r', d.r).attr('fill', c).style('filter', `drop-shadow(0 0 ${d.r * .7}px ${c})`);
       s.append('circle').attr('r', d.r * .42).attr('fill', '#fff');
       s.append('path').attr('class', 'ret').attr('d', `M${-o} ${-o + q}V${-o}H${-o + q}M${o - q} ${-o}H${o}V${-o + q}M${o} ${o - q}V${o}H${o - q}M${-o + q} ${o}H${-o}V${o - q}`);
-      if (d.ref.id === justAdded) {
-        s.append('line').attr('x1', -d.r - 5).attr('y1', -d.r - 4).attr('x2', d.r + 5).attr('y2', d.r + 4)
-          .attr('stroke', '#5ed38c').attr('stroke-width', 1.8).attr('stroke-dasharray', '3 2').attr('stroke-linecap', 'round');
-        s.append('text').attr('x', -d.r - 7).attr('y', -d.r - 4).attr('text-anchor', 'end').attr('font-size', 10).attr('font-weight', 600)
-          .attr('fill', '#7fe0a6').attr('fill-opacity', .85).text('방금 기록');
-      }
       s.append('text').attr('class', 'lbl').attr('x', d.r + 7).attr('y', 4.5).attr('fill', light)
         .attr('font-size', 13).attr('font-weight', 600).attr('display', labelVisible(d) ? null : 'none')
         .text(d.label.length > 16 ? d.label.slice(0, 15) + '…' : d.label);
