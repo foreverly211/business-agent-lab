@@ -502,7 +502,7 @@ function hintKeywords(name){
 const KEY = 'byeoljari.v1';
 let storageOK = true;
 try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); } catch { storageOK = false; }
-const emptyState = () => ({ version:1, tutorialDone:false, profile:{ name:'', majors:[] }, categories:[], experiences:[], tagCats:{}, goal:{ name:'', areas:[] }, virtuals:[], lastAddedId:null });
+const emptyState = () => ({ version:1, tutorialDone:false, profile:{ name:'', majors:[] }, categories:[], experiences:[], tagCats:{}, goal:{ name:'', areas:[] }, virtuals:[] });
 let state = emptyState();
 let demo = false;          // true while the tutorial shows the sample student
 let realState = null;      // the viewer's own data, parked during the tutorial
@@ -600,7 +600,6 @@ function makeSample(){
     E('2026-09-03','공모전','공공데이터 활용 공모전 예선',3.5,3,['데이터 분석','시각화','비즈니스 이해'],'공공데이터로 지역 상권 변화를 분석해 예선을 통과했다. SQL을 몰라 데이터 추출에서 시간이 오래 걸렸다.'),
   ];
   s.goal = { name:'Data Analyst', areas:['데이터 분석','SQL','통계','문제 정의','비즈니스 이해','시각화'] };
-  s.lastAddedId = s.experiences[s.experiences.length - 1].id;
   s.virtuals = [
     { id: uid(), label:'SQL', links:['데이터 분석','Python'], createdAt:'2026-09-10', realizedAt:null, realizedBy:null },
     { id: uid(), label:'통계 프로젝트', links:['통계','데이터 분석'], createdAt:'2026-09-10', realizedAt:null, realizedBy:null },
@@ -694,6 +693,7 @@ const catLabel = name => /자리$/.test(name) ? name : name + '자리';
 let sim = null, zoomT = null, showLabels = recall('labels') !== '0', showLines = recall('lines') !== '0';
 const posCache = new Map();
 let panelNode = null;
+let justAdded = null;   // marks the star recorded in this visit only; gone after a reload
 
 function buildGraph(){
   const nodes = [], links = [], idx = new Map();
@@ -735,6 +735,7 @@ function renderGraphView(){
     <svg id="graph-svg" role="img" aria-label="경험과 태그가 연결된 별자리 그래프"></svg>
     <div class="sky-tools">
       <div class="sky-seg">
+        <button data-new-record>+ 기록하기</button>
         <button id="g-add-virt">+ 관측 예정 별</button>
         <button id="g-labels" aria-pressed="${showLabels}">별 이름</button>
         <button id="g-lines" aria-pressed="${showLines}">별자리 선</button>
@@ -749,7 +750,7 @@ function renderGraphView(){
     <div class="sl-grid">${LIGHT_LEGEND.map(([name, k]) => `<div class="sl-chip"><i style="background:${STARLIGHT[k][0]};box-shadow:0 0 10px ${STARLIGHT[k][0]}"></i><span style="color:${STARLIGHT[k][1]}">${name}</span></div>`).join('')}</div>
     <div class="sl-marks">
       <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>선택한 별</span>
-      <span><svg width="22" height="10" viewBox="0 0 22 10" aria-hidden="true"><line x1="1" y1="5" x2="21" y2="5" stroke="#34a866" stroke-width="3" stroke-dasharray="5 3"/></svg>방금 기록한 별</span>
+      <span><svg width="22" height="10" viewBox="0 0 22 10" aria-hidden="true"><line x1="1" y1="5" x2="21" y2="5" stroke="#34a866" stroke-width="2" stroke-dasharray="3 2"/></svg>방금 기록한 별 (다시 열면 사라져요)</span>
       <span><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><ellipse cx="7" cy="8" rx="4.5" ry="6.5" fill="none" stroke="#5b8fd6" stroke-width="1.8" transform="rotate(25 7 8)"/></svg>관측 예정 별</span>
       <span><svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="3" fill="#8e97ad"/></svg>작은 회색 별 = 태그</span>
       <span>별자리 이름 = 전공 분야</span>
@@ -830,11 +831,11 @@ function drawGraph(){
       s.append('circle').attr('r', d.r).attr('fill', c).style('filter', `drop-shadow(0 0 ${d.r * .7}px ${c})`);
       s.append('circle').attr('r', d.r * .42).attr('fill', '#fff');
       s.append('path').attr('class', 'ret').attr('d', `M${-o} ${-o + q}V${-o}H${-o + q}M${o - q} ${-o}H${o}V${-o + q}M${o} ${o - q}V${o}H${o - q}M${-o + q} ${o}H${-o}V${o - q}`);
-      if (d.ref.id === state.lastAddedId) {
-        s.append('line').attr('x1', -d.r - 12).attr('y1', -d.r - 10).attr('x2', d.r + 12).attr('y2', d.r + 10)
-          .attr('stroke', '#5ed38c').attr('stroke-width', 3).attr('stroke-dasharray', '5 3').attr('stroke-linecap', 'round');
-        s.append('text').attr('x', -d.r - 14).attr('y', -d.r - 10).attr('text-anchor', 'end').attr('font-size', 11).attr('font-weight', 600)
-          .attr('fill', '#7fe0a6').text('방금 기록한 별');
+      if (d.ref.id === justAdded) {
+        s.append('line').attr('x1', -d.r - 5).attr('y1', -d.r - 4).attr('x2', d.r + 5).attr('y2', d.r + 4)
+          .attr('stroke', '#5ed38c').attr('stroke-width', 1.8).attr('stroke-dasharray', '3 2').attr('stroke-linecap', 'round');
+        s.append('text').attr('x', -d.r - 7).attr('y', -d.r - 4).attr('text-anchor', 'end').attr('font-size', 10).attr('font-weight', 600)
+          .attr('fill', '#7fe0a6').attr('fill-opacity', .85).text('방금 기록');
       }
       s.append('text').attr('class', 'lbl').attr('x', d.r + 7).attr('y', 4.5).attr('fill', light)
         .attr('font-size', 13).attr('font-weight', 600).attr('display', labelVisible(d) ? null : 'none')
@@ -1179,7 +1180,7 @@ function openEditor(id, preset = {}){
     let realized = [];
     const ok = commit(() => {
       if (src) Object.assign(src, ed);
-      else { ed.id = uid(); ed.createdAt = today(); state.experiences.push(ed); state.lastAddedId = ed.id; }
+      else { ed.id = uid(); ed.createdAt = today(); state.experiences.push(ed); justAdded = ed.id; }
       const saved = src || ed;
       for (const v of state.virtuals) if (!v.realizedAt && labelMatches(v.label, saved)) { v.realizedAt = today(); v.realizedBy = saved.id; realized.push(v.label); }
     });
