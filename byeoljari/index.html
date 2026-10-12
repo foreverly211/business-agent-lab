@@ -131,6 +131,13 @@ button.chip:hover{border-color:var(--line)}
 @keyframes newbloom{50%{opacity:.55;transform:scale(1.18)}}
 @media (prefers-reduced-motion: reduce){.newbloom{animation:none}}
 .grad{background:linear-gradient(90deg,#2f6bff,#2fb8ff 55%,#3fd6a6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sky-search{margin-left:auto;display:flex;align-items:center;gap:8px;padding:4px 6px 4px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px)}
+.sky-search svg{flex:none;opacity:.7}
+.sky-search input{background:transparent;border:0;color:#fff;font-size:13px;width:170px;padding:6px 0;outline:none}
+.sky-search input::placeholder{color:rgba(245,245,247,.55)}
+.sky-search input::-webkit-search-cancel-button{filter:invert(1)}
+.sky-search .cnt{font-size:12px;color:rgba(245,245,247,.65);white-space:nowrap;padding-right:6px;font-variant-numeric:tabular-nums}
+.node.found .ret{opacity:.95;stroke:#ffd23f}
 .sky-seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px)}
 .sky-seg button{border:0;border-radius:999px;padding:7px 14px;font-size:13px;color:#fff;background:transparent}
 .sky-seg button:hover{background:rgba(255,255,255,.12)}
@@ -711,7 +718,35 @@ let sim = null, zoomT = null, showLabels = recall('labels') !== '0', showLines =
 const posCache = new Map();
 let panelNode = null;
 let justAdded = null;
-let graphFocus = null;   // marks the star recorded in this visit only; gone after a reload
+let graphFocus = null, graphApi = null;
+// keyword search in the sky: matching stars stay bright, Enter flies to them one by one
+let searchQ = '', searchIdx = -1;
+function nodeMatches(d, q){
+  if (d.type === 'exp') { const e = d.ref; return norm([e.title, e.body, e.type, ...e.tags, ...Object.values(e.guide || {})].join(' ')).includes(q); }
+  return norm(d.label).includes(q);
+}
+function searchHits(){
+  const q = norm(searchQ); if (!q || !graphApi) return [];
+  const order = { exp: 0, virt: 1, tag: 2, cat: 3 };
+  return graphApi.nodes.filter(d => nodeMatches(d, q)).sort((a, b) => order[a.type] - order[b.type]);
+}
+function applySearch(){
+  const cnt = $('#g-search-cnt'); if (!graphApi) return;
+  const { node, linkG } = graphApi, q = norm(searchQ);
+  if (!q) { if (cnt) cnt.textContent = ''; node.classed('found', false); searchQ = ''; graphFocus(panelNode); return; }
+  const hits = new Set(searchHits().map(d => d.id));
+  if (cnt) cnt.textContent = hits.size ? `${hits.size}개` : '없음';
+  node.classed('found', d => hits.has(d.id)).attr('opacity', d => hits.has(d.id) ? 1 : .12);
+  linkG.selectAll('.lnk').attr('opacity', d => hits.has(d.source.id) || hits.has(d.target.id) ? .55 : .03);
+}
+function jumpToMatch(dir){
+  const hits = searchHits(); if (!hits.length || !graphApi) return;
+  searchIdx = (searchIdx + dir + hits.length) % hits.length;
+  const d = hits[searchIdx], { svg, zoom } = graphApi;
+  svg.transition().duration(650).call(zoom.translateTo, d.x, d.y);
+  openPanel(d); applySearch();
+  const cnt = $('#g-search-cnt'); if (cnt) cnt.textContent = `${searchIdx + 1} / ${hits.length}`;
+}   // marks the star recorded in this visit only; gone after a reload
 
 function buildGraph(){
   const nodes = [], links = [], idx = new Map();
@@ -760,6 +795,11 @@ function renderGraphView(){
         <button id="g-reset">가운데로</button>
         <button id="g-view">별 감상하기</button>
       </div>
+      <label class="sky-search">
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M11 11l3.5 3.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <input id="g-search" type="search" placeholder="키워드로 별 찾기" aria-label="하늘에서 키워드로 별 찾기" autocomplete="off" value="${esc(searchQ)}">
+        <span class="cnt" id="g-search-cnt" aria-live="polite"></span>
+      </label>
     </div>
     <div class="sky-panel" id="graph-panel" hidden></div>
     <div class="view-exit"><span class="hint">드래그해서 둘러보고, 휠로 확대해요</span><button class="sky-btn" id="g-view-exit">감상 끝내기 · Esc</button></div>
@@ -781,6 +821,12 @@ function renderGraphView(){
   $('#g-lines').onclick = e => { showLines = !showLines; remember('lines', showLines ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLines); if (graphFocus) graphFocus(panelNode); };
   $('#g-reset').onclick = () => { zoomT = null; drawGraph(); };
   $('#g-view').onclick = enterViewing;
+  const si = $('#g-search');
+  si.addEventListener('input', () => { searchQ = si.value; searchIdx = -1; applySearch(); });
+  si.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); jumpToMatch(e.shiftKey ? -1 : 1); }
+    if (e.key === 'Escape') { e.stopPropagation(); si.value = ''; searchQ = ''; applySearch(); }
+  });
   $('#g-view-exit').onclick = exitViewing;
   $('#g-add-virt').onclick = () => openVirtualForm();
   requestAnimationFrame(drawGraph);
@@ -890,11 +936,13 @@ function drawGraph(){
   const adj = new Map(nodes.map(n => [n.id, new Set([n.id])]));
   for (const l of links) { adj.get(l.source)?.add(l.target); adj.get(l.target)?.add(l.source); }
   const focus = id => {
+    if (!id && norm(searchQ)) { applySearch(); return; }
+    node.classed('found', false);
     node.attr('opacity', d => !id || adj.get(id).has(d.id) ? 1 : .2);
     // with 별자리 선 off, only the hovered or selected star's own lines show
     linkG.selectAll('.lnk').attr('opacity', d => d.source.id === id || d.target.id === id ? 1 : !id ? (showLines ? 1 : 0) : (showLines ? .08 : 0));
   };
-  graphFocus = focus; focus(null);
+  graphFocus = focus; graphApi = { svg, zoom, node, linkG, nodes }; focus(null);
 
   node.on('mouseenter', (e, d) => focus(d.id)).on('mouseleave', () => focus(panelNode))
     .on('click', (e, d) => { e.stopPropagation(); openPanel(d); focus(d.id); })
