@@ -305,7 +305,9 @@ textarea.input{width:100%;resize:vertical;line-height:1.6;font-size:16px}
 .toasts{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-width:calc(100% - 32px)}
 .toast{background:var(--fg);color:var(--bg);padding:12px 20px;border-radius:999px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:tin .25s ease-out}
 @keyframes tin{from{transform:translateY(10px);opacity:0}}
-.tour{position:fixed;inset:0;z-index:80}
+.tour{position:fixed;inset:0;z-index:80;overscroll-behavior:contain;touch-action:none}
+html.touring,html.touring body{overflow:hidden}
+html{scrollbar-gutter:stable}
 .tour-spot{position:fixed;border-radius:20px;box-shadow:0 0 0 9999px rgba(0,0,0,.58);transition:all .35s cubic-bezier(.2,.8,.2,1);pointer-events:none}
 .tour-card{position:fixed;width:min(380px,calc(100vw - 32px));background:var(--bg);color:var(--fg);border-radius:20px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:10px;transition:top .35s,left .35s}
 .tour-card h3{font-size:21px}
@@ -1471,6 +1473,7 @@ function startTour(fresh){
   realState = fresh ? null : state;
   demo = true; state = makeSample(); posCache.clear(); zoomT = null; panelNode = null;
   closeModal(); tourI = 0;
+  document.documentElement.classList.add('touring');
   $('#tour-root').innerHTML = `<div class="tour" role="dialog" aria-modal="true" aria-labelledby="tour-title"><div class="tour-spot" id="tour-spot"></div><div class="tour-card" id="tour-card"></div></div>`;
   showStep();
 }
@@ -1506,8 +1509,19 @@ function placeStep(){
   card.style.top = ct + 'px'; card.style.left = cl + 'px';
 }
 addEventListener('resize', () => { if ($('#tour-card')) placeStep(); });
+// While the tour runs, the viewer can't scroll or zoom away from the highlighted area.
+const touring = () => document.documentElement.classList.contains('touring');
+const blockScroll = e => { if (touring()) e.preventDefault(); };
+addEventListener('wheel', blockScroll, { passive: false, capture: true });
+addEventListener('touchmove', blockScroll, { passive: false, capture: true });
+addEventListener('keydown', e => {
+  if (!touring()) return;
+  const keys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'];
+  if (keys.includes(e.key) || (e.key === ' ' && !e.target.closest('button'))) e.preventDefault();
+}, { capture: true });
 function endTour(){
   $('#tour-root').innerHTML = '';
+  document.documentElement.classList.remove('touring');
   demo = false; posCache.clear(); zoomT = null; panelNode = null;
   state = realState || emptyState(); realState = null;
   state.tutorialDone = true; save();
