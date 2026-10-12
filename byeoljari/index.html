@@ -98,9 +98,9 @@ button.chip:hover{border-color:var(--line)}
 
 /* sky */
 .sky{position:relative;background:radial-gradient(60% 55% at 18% 20%,rgba(70,90,255,.28),transparent 60%),radial-gradient(45% 50% at 88% 85%,rgba(47,211,255,.16),transparent 60%),radial-gradient(40% 45% at 70% 25%,rgba(190,120,255,.14),transparent 60%),radial-gradient(120% 90% at 50% 0%,#0d1530,#04060c 72%);border-radius:var(--r-tile);height:clamp(460px,72vh,780px);overflow:hidden;color:var(--sky-fg);color-scheme:dark}
-.sky svg{width:100%;height:100%;display:block;cursor:grab}
-.sky svg:active{cursor:grabbing}
-.sky-tools{position:absolute;top:16px;left:16px;right:16px;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none}
+#graph-svg{width:100%;height:100%;display:block;cursor:grab}
+#graph-svg:active{cursor:grabbing}
+.sky-tools{position:absolute;top:16px;left:16px;right:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;pointer-events:none}
 .sky-tools>*{pointer-events:auto}
 .sky-btn{background:rgba(255,255,255,.1);color:var(--sky-fg);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);border-radius:999px;padding:7px 14px;font-size:13px}
 .sky-btn:hover{background:rgba(255,255,255,.18)}
@@ -131,9 +131,11 @@ button.chip:hover{border-color:var(--line)}
 @keyframes newbloom{50%{opacity:.55;transform:scale(1.18)}}
 @media (prefers-reduced-motion: reduce){.newbloom{animation:none}}
 .grad{background:linear-gradient(90deg,#2f6bff,#2fb8ff 55%,#3fd6a6);-webkit-background-clip:text;background-clip:text;color:transparent}
-.sky-search{margin-left:auto;display:flex;align-items:center;gap:8px;padding:4px 6px 4px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px)}
+.sky-search{margin-left:auto;display:flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 12px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:background .15s,border-color .15s}
+.sky-search:focus-within{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
+.sky-search svg{width:13px;height:13px}
 .sky-search svg{flex:none;opacity:.7}
-.sky-search input{background:transparent;border:0;color:#fff;font-size:13px;width:170px;padding:6px 0;outline:none}
+.sky-search input{background:transparent;border:0;color:#fff;font-size:13px;width:150px;padding:0;outline:none}
 .sky-search input::placeholder{color:rgba(245,245,247,.55)}
 .sky-search input::-webkit-search-cancel-button{filter:invert(1)}
 .sky-search .cnt{font-size:12px;color:rgba(245,245,247,.65);white-space:nowrap;padding-right:6px;font-variant-numeric:tabular-nums}
