@@ -127,6 +127,9 @@ button.chip:hover{border-color:var(--line)}
 .node .ret{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;opacity:0;transition:opacity .15s}
 .node:focus-visible .ret{opacity:.9;stroke:#2997ff}
 .node.selected .ret{opacity:1}
+.newbloom{transform-box:fill-box;transform-origin:center;animation:newbloom 2.6s ease-in-out infinite}
+@keyframes newbloom{50%{opacity:.55;transform:scale(1.18)}}
+@media (prefers-reduced-motion: reduce){.newbloom{animation:none}}
 .grad{background:linear-gradient(90deg,#2f6bff,#2fb8ff 55%,#3fd6a6);-webkit-background-clip:text;background-clip:text;color:transparent}
 .sky-seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px)}
 .sky-seg button{border:0;border-radius:999px;padding:7px 14px;font-size:13px;color:#fff;background:transparent}
@@ -827,6 +830,10 @@ function drawGraph(){
     if (d.type === 'exp') {
       const [c, light] = starOf(d.ref), k = lightOf(d.ref), o = d.r + 7, q = 5;
       s.append('circle').attr('r', d.r * 3.4).attr('fill', `url(#bl-${k})`);
+      if (d.ref.id === justAdded) {
+        s.append('circle').attr('class', 'newbloom').attr('r', d.r * 6).attr('fill', `url(#bl-${k})`);
+        s.append('circle').attr('r', d.r * 3).attr('fill', `url(#bl-${k})`);
+      }
       s.append('circle').attr('r', d.r).attr('fill', c).style('filter', `drop-shadow(0 0 ${d.r * .7}px ${c})`);
       s.append('circle').attr('r', d.r * .42).attr('fill', '#fff');
       s.append('path').attr('class', 'ret').attr('d', `M${-o} ${-o + q}V${-o}H${-o + q}M${o - q} ${-o}H${o}V${-o + q}M${o} ${o - q}V${o}H${o - q}M${-o + q} ${o}H${-o}V${o - q}`);
