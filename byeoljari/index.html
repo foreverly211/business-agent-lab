@@ -119,7 +119,10 @@ button.chip:hover{border-color:var(--line)}
 .sky-empty>div{pointer-events:auto;text-align:center;max-width:420px;display:flex;flex-direction:column;gap:12px;align-items:center}
 .sky-empty h3{font-size:28px;font-weight:700}
 .sky-empty p{color:var(--sky-dim)}
-.node{cursor:pointer}
+.node{cursor:pointer;outline:none}
+.node .ring{fill:none;stroke:#fff;stroke-width:2;opacity:0;transition:opacity .15s}
+.node:focus-visible .ring{opacity:.9;stroke:#2997ff}
+.node.selected .ring{opacity:.9}
 .node text{pointer-events:none;paint-order:stroke;stroke:rgba(4,6,12,.85);stroke-width:3px}
 .twinkle{animation:tw 4s ease-in-out infinite}
 @keyframes tw{50%{opacity:.15}}
@@ -725,6 +728,7 @@ function drawGraph(){
     .attr('tabindex', 0).attr('role', 'button').attr('aria-label', d => ({exp:'경험', tag:'태그', cat:'전공 분야', virt:'가상 별'}[d.type]) + ' ' + d.label);
   node.each(function(d){
     const s = d3.select(this);
+    s.append('circle').attr('class', 'ring').attr('r', d.type === 'cat' ? d.r + 11 : d.r + 5);
     if (d.type === 'exp') {
       s.append('circle').attr('r', d.r).attr('fill', 'url(#starg)').attr('filter', 'url(#glow)');
       s.append('circle').attr('r', d.r * .35).attr('fill', '#fff');
@@ -774,9 +778,10 @@ function drawGraph(){
     .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
   if (panelNode) { const pn = nodes.find(n => n.id === panelNode); if (pn) { openPanel(pn); focus(pn.id); } else closePanel(); }
 }
-function closePanel(){ panelNode = null; const p = $('#graph-panel'); if (p) p.hidden = true; if (typeof d3 !== 'undefined') { d3.selectAll('#graph-svg .node').attr('opacity', 1); d3.selectAll('#graph-svg line').attr('opacity', 1); } }
+function closePanel(){ panelNode = null; const p = $('#graph-panel'); if (p) p.hidden = true; if (typeof d3 !== 'undefined') { d3.selectAll('#graph-svg .node').classed('selected', false); d3.selectAll('#graph-svg .node').attr('opacity', 1); d3.selectAll('#graph-svg line').attr('opacity', 1); } }
 function openPanel(d){
   panelNode = d.id;
+  if (typeof d3 !== 'undefined') d3.selectAll('#graph-svg .node').classed('selected', n => n.id === d.id);
   const p = $('#graph-panel'); if (!p) return;
   let h = `<button class="icon-btn close" aria-label="닫기" id="gp-close">×</button>`;
   if (d.type === 'exp') {
