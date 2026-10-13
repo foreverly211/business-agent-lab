@@ -713,7 +713,7 @@ const who = () => state.profile.name || '당신';
 
 /* ================= GRAPH ================= */
 // Star colours: one hue per activity type, so a glance tells what kind of experience a star is.
-const STARLIGHT = { blue:['#6aa8ff','#a9ccff'], violet:['#c6b6ff','#ddd3ff'], lime:['#a8f06a','#cff7a8'], gold:['#ffd23f','#ffe489'], teal:['#4fe3d0','#9ff3e6'], orange:['#ff9f45','#ffc48f'], pink:['#ff6f91','#ffaabd'], silver:['#d9dee8','#e6eaf2'] };
+const STARLIGHT = { blue:['#6aa8ff','#a9ccff'], violet:['#c6b6ff','#ddd3ff'], lime:['#c6f4a3','#e1fac9'], gold:['#ffe59a','#fff1c6'], teal:['#a3efe3','#cdf8f1'], orange:['#ffc79e','#ffdfc6'], pink:['#ffb3c6','#ffd6e0'], silver:['#d9dee8','#e6eaf2'] };
 const TYPE_LIGHT = { '공모전':'blue', '프로젝트':'violet', '수업':'violet', '동아리':'lime', '대외활동':'teal', '봉사':'orange', '인턴':'gold', '아르바이트':'silver', '개인 경험':'pink', '기타':'silver' };
 const LIGHT_LEGEND = [['공모전','blue'],['수업 · 프로젝트','violet'],['동아리','lime'],['인턴','gold'],['대외활동','teal'],['봉사','orange'],['개인 경험·여행','pink'],['아르바이트 · 기타','silver']];
 const lightOf = e => TYPE_LIGHT[e.type] || 'silver';
@@ -1486,7 +1486,7 @@ function radarSVG(rows, max){
 }
 
 /* ================= TIMELINE ================= */
-const TL_COLORS = ['#6aa8ff', '#ffd23f', '#a8f06a', '#ff6f91', '#4fe3d0'];
+const TL_COLORS = ['#6aa8ff', '#ffe59a', '#c6f4a3', '#ffb3c6', '#a3efe3'];
 function monthsBetween(a, b){ const out = []; let y = +a.slice(0, 4), m = +a.slice(5, 7); const ey = +b.slice(0, 4), em = +b.slice(5, 7);
   while (y < ey || (y === ey && m <= em)) { out.push(`${y}-${String(m).padStart(2, '0')}`); m++; if (m > 12) { m = 1; y++; } } return out; }
 // Smooth step: each rise eases in and out, so the line never overshoots a count.
