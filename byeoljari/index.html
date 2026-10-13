@@ -717,7 +717,7 @@ const starRadius = sc => 2.5 + Math.pow(sc / 5, 1.4) * 12;
 const starOf = e => STARLIGHT[lightOf(e)];
 
 let sim = null, zoomT = null, showLabels = recall('labels') !== '0', showLines = recall('lines') !== '0';
-const posCache = new Map();
+const posCache = new Map(), pinCache = new Map();
 let panelNode = null;
 let justAdded = null;
 let graphFocus = null, graphApi = null;
@@ -821,7 +821,7 @@ function renderGraphView(){
   </div>`;
   $('#g-labels').onclick = e => { showLabels = !showLabels; remember('labels', showLabels ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLabels); if (typeof d3 !== 'undefined') d3.selectAll('#graph-svg .lbl').attr('display', d => labelVisible(d) ? null : 'none'); };
   $('#g-lines').onclick = e => { showLines = !showLines; remember('lines', showLines ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLines); if (graphFocus) graphFocus(panelNode); };
-  $('#g-reset').onclick = () => { zoomT = null; drawGraph(); };
+  $('#g-reset').onclick = () => { zoomT = null; pinCache.clear(); drawGraph(); if (sim) sim.alpha(.5).restart(); };
   $('#g-view').onclick = enterViewing;
   const si = $('#g-search');
   si.addEventListener('input', () => { searchQ = si.value; searchIdx = -1; applySearch(); });
@@ -951,11 +951,19 @@ function drawGraph(){
     .on('keydown', (e, d) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPanel(d); focus(d.id); } });
 
   const ends = l => [l.source.x, l.source.y, l.target.x, l.target.y];
-  sim = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink(links).id(d => d.id).distance(l => l.kind === 'tc' ? 95 : l.kind === 'v' ? 70 : 66).strength(l => l.kind === 'tc' ? .35 : .6))
-    .force('charge', d3.forceManyBody().strength(d => d.type === 'cat' ? -520 : d.type === 'exp' ? -240 : -120))
+  // Springs soften as a node gains links (d3's own 1/degree rule), so a busy graph stays loose
+  // instead of snapping back into one rigid shape when a star is dragged.
+  const deg = {};
+  for (const l of links) { deg[l.source] = (deg[l.source] || 0) + 1; deg[l.target] = (deg[l.target] || 0) + 1; }
+  const idOf = v => typeof v === 'object' ? v.id : v;
+  for (const n of nodes) { const p = pinCache.get(n.id); if (p) { n.fx = p.x; n.fy = p.y; } }
+  sim = d3.forceSimulation(nodes).velocityDecay(.5)
+    .force('link', d3.forceLink(links).id(d => d.id)
+      .distance(l => l.kind === 'tc' ? 110 : l.kind === 'v' ? 80 : 72)
+      .strength(l => (l.kind === 'tc' ? .25 : l.kind === 'v' ? .5 : .7) / Math.min(deg[idOf(l.source)] || 1, deg[idOf(l.target)] || 1)))
+    .force('charge', d3.forceManyBody().strength(d => d.type === 'cat' ? -480 : d.type === 'exp' ? -300 : -130).distanceMax(520))
     .force('collide', d3.forceCollide(d => d.type === 'cat' ? 52 : d.type === 'exp' ? d.r + 14 : d.type === 'virt' ? 18 : 9))
-    .force('x', d3.forceX(0).strength(.045)).force('y', d3.forceY(state.experiences.length ? 0 : -H * .16).strength(.065))
+    .force('x', d3.forceX(0).strength(.025)).force('y', d3.forceY(state.experiences.length ? 0 : -H * .16).strength(.035))
     .on('tick', () => {
       for (const sel of [link, glow]) sel.attr('x1', d => ends(d)[0]).attr('y1', d => ends(d)[1]).attr('x2', d => ends(d)[2]).attr('y2', d => ends(d)[3]);
       nebula.attr('cx', d => d.x).attr('cy', d => d.y);
@@ -965,9 +973,11 @@ function drawGraph(){
   if (nodes.every(n => posCache.has(n.id))) sim.alpha(.25);
 
   node.call(d3.drag().clickDistance(4)
-    .on('start', (e, d) => { if (!e.active) sim.alphaTarget(.25).restart(); d.fx = d.x; d.fy = d.y; })
+    .on('start', (e, d) => { if (!e.active) sim.alphaTarget(.15).restart(); d.fx = d.x; d.fy = d.y; })
     .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
-    .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
+    // a dragged star stays where it is dropped; double-click it to let it float again
+    .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); pinCache.set(d.id, { x: d.fx, y: d.fy }); }));
+  node.on('dblclick', (e, d) => { e.stopPropagation(); pinCache.delete(d.id); d.fx = null; d.fy = null; sim.alpha(.3).restart(); });
   if (panelNode) { const pn = nodes.find(n => n.id === panelNode); if (pn) { openPanel(pn); focus(pn.id); } else closePanel(); }
 }
 function enterViewing(){
