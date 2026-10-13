@@ -389,6 +389,7 @@ textarea.input{width:100%;resize:vertical;line-height:1.6;font-size:16px}
 .view-exit .hint{font-size:12px;color:rgba(245,245,247,.55)}
 .view-exit .sky-btn{white-space:nowrap}
 html.viewing-mode,html.viewing-mode body{overflow:hidden}
+html.viewing-mode{scrollbar-gutter:auto}
 .shoot{stroke:#fff;stroke-width:1.6;stroke-linecap:round;opacity:0;transform-box:fill-box;transform-origin:left;animation:shoot 1.6s ease-out forwards;filter:drop-shadow(0 0 4px rgba(200,220,255,.9))}
 @keyframes shoot{0%{opacity:0;transform:translate(0,0)}12%{opacity:.95}100%{opacity:0;transform:translate(340px,145px)}}
 html.touring,html.touring body{overflow:hidden}
@@ -726,7 +727,7 @@ const posCache = new Map(), pinCache = new Map();
 let flingRAF = null;
 let panelNode = null;
 let justAdded = null;
-let graphFocus = null, graphApi = null;
+let graphFocus = null, graphApi = null, userZoomed = false;
 // keyword search in the sky: matching stars stay bright, Enter flies to them one by one
 let searchQ = '', searchIdx = -1;
 function nodeMatches(d, q){
@@ -822,7 +823,7 @@ function renderGraphView(){
   </div>`;
   $('#g-labels').onclick = e => { showLabels = !showLabels; remember('labels', showLabels ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLabels); if (typeof d3 !== 'undefined') d3.selectAll('#graph-svg .lbl').attr('display', d => labelVisible(d) ? null : 'none'); };
   $('#g-lines').onclick = e => { showLines = !showLines; remember('lines', showLines ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLines); if (graphFocus) graphFocus(panelNode); };
-  $('#g-reset').onclick = () => { zoomT = null; pinCache.clear(); drawGraph(); if (sim) sim.alpha(.5).restart(); };
+  $('#g-reset').onclick = () => { zoomT = null; userZoomed = false; pinCache.clear(); drawGraph(); if (sim) sim.alpha(.5).restart(); };
   $('#g-view').onclick = enterViewing;
   const si = $('#g-search');
   si.addEventListener('input', () => { searchQ = si.value; searchIdx = -1; applySearch(); });
@@ -864,6 +865,7 @@ function skyPoint(d){
 }
 function showTip(d){
   const tip = $('#graph-tip'); if (!tip || $('#graph.viewing')) return;
+  if (panelNode === d.id) { hideTip(); return; }
   if (d.type === 'exp') tip.innerHTML = `${esc(d.label)}<small>${esc(d.ref.type)} · ${d.ref.date.slice(0, 7).replace('-', '.')}</small>`;
   else if (d.type === 'tag') tip.innerHTML = `${esc(d.label)}<small>태그 · 경험 ${d.count}개</small>`;
   else tip.innerHTML = `${esc(d.label)}<small>관측 예정</small>`;
@@ -926,7 +928,7 @@ function drawGraph(){
   });
 
   const g = svg.append('g').attr('id', 'drift').append('g');
-  const zoom = d3.zoom().scaleExtent([.25, 4]).on('zoom', e => { zoomT = e.transform; g.attr('transform', e.transform); hideTip(); placePanel(); });
+  const zoom = d3.zoom().scaleExtent([.25, 4]).on('zoom', e => { if (e.sourceEvent) userZoomed = true; zoomT = e.transform; g.attr('transform', e.transform); hideTip(); placePanel(); });
   svg.call(zoom).on('dblclick.zoom', null);
   svg.call(zoom.transform, zoomT || d3.zoomIdentity);
   svg.on('click', e => { if (e.target === svg.node()) closePanel(); });
@@ -935,9 +937,10 @@ function drawGraph(){
   // activity-type zones: experiences of one type gather, and a dashed zone with the type name wraps them
   const types = uniq(nodes.filter(n => n.type === 'exp').map(n => lightOf(n.ref)));
   const typeName = Object.fromEntries(LIGHT_LEGEND.map(([name, k]) => [k, name]));
-  const cols = Math.min(4, types.length), rows = Math.ceil(types.length / Math.max(cols, 1));
+  // wide skies get up to 4 zones per row, narrow (phone) skies 2, so the zones fill the space
+  const cols = Math.min(W < 640 ? 2 : W < 900 ? 3 : 4, types.length), rows = Math.ceil(types.length / Math.max(cols, 1));
   const anchor = {};
-  types.forEach((k, i) => { anchor[k] = { x: ((i % cols) - (cols - 1) / 2) * 300, y: (Math.floor(i / cols) - (rows - 1) / 2) * 280 }; });
+  types.forEach((k, i) => { anchor[k] = { x: ((i % cols) - (cols - 1) / 2) * 340, y: (Math.floor(i / cols) - (rows - 1) / 2) * 310 }; });
   const zoneG = g.append('g').attr('aria-hidden', 'true').selectAll('g').data(types).join('g');
   zoneG.append('ellipse').attr('fill', k => `url(#zone-${k})`).attr('stroke', k => STARLIGHT[k][0]).attr('stroke-opacity', .5)
     .attr('stroke-width', 1.2).attr('stroke-dasharray', '4 6');
@@ -1011,7 +1014,7 @@ function drawGraph(){
   graphFocus = focus; graphApi = { svg, zoom, node, linkG, nodes }; focus(null);
 
   node.on('mouseenter', (e, d) => { focus(d.id); showTip(d); }).on('mouseleave', () => { focus(panelNode); hideTip(); })
-    .on('click', (e, d) => { e.stopPropagation(); openPanel(d); focus(d.id); })
+    .on('click', (e, d) => { e.stopPropagation(); hideTip(); openPanel(d); focus(d.id); })
     .on('keydown', (e, d) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPanel(d); focus(d.id); } });
 
   const ends = l => [l.source.x, l.source.y, l.target.x, l.target.y];
@@ -1028,16 +1031,28 @@ function drawGraph(){
     .force('charge', d3.forceManyBody().strength(d => d.type === 'exp' ? -320 : -110).distanceMax(520))
     .force('collide', d3.forceCollide(d => d.type === 'exp' ? d.r * 1.6 + 14 : d.type === 'virt' ? 18 : 10))
     // each experience is pulled toward its activity type's spot, so types form clusters
-    .force('x', d3.forceX(d => d.type === 'exp' ? anchor[lightOf(d.ref)].x : 0).strength(d => d.type === 'exp' ? .07 : .015))
-    .force('y', d3.forceY(d => d.type === 'exp' ? anchor[lightOf(d.ref)].y : (state.experiences.length ? 0 : -H * .16)).strength(d => d.type === 'exp' ? .07 : .02))
+    .force('x', d3.forceX(d => d.type === 'exp' ? anchor[lightOf(d.ref)].x : 0).strength(d => d.type === 'exp' ? .16 : .015))
+    .force('y', d3.forceY(d => d.type === 'exp' ? anchor[lightOf(d.ref)].y : (state.experiences.length ? 0 : -H * .16)).strength(d => d.type === 'exp' ? .16 : .02))
     .on('tick', () => {
       for (const sel of [link, glow]) sel.attr('x1', d => ends(d)[0]).attr('y1', d => ends(d)[1]).attr('x2', d => ends(d)[2]).attr('y2', d => ends(d)[3]);
       node.attr('transform', d => `translate(${d.x},${d.y})`);
       placeZones();
       if (panelNode) placePanel();
     })
-    .on('end', () => nodes.forEach(n => posCache.set(n.id, { x: n.x, y: n.y })));
+    .on('end', () => { nodes.forEach(n => posCache.set(n.id, { x: n.x, y: n.y })); fitView(); });
   if (nodes.every(n => posCache.has(n.id))) sim.alpha(.25);
+  // Show every star: once the layout settles, zoom so the whole sky fits below the toolbar.
+  const fitView = (animate = true) => {
+    if (userZoomed || !nodes.length) return;
+    const pad = 28, top = ($('#graph .sky-tools')?.offsetHeight || 40) + 36;
+    const xs = nodes.flatMap(n => [n.x - n.r * 2.6, n.x + n.r * 2.6]), ys = nodes.flatMap(n => [n.y - n.r * 2.6 - 26, n.y + n.r * 2.6]);
+    const bw = Math.max(...xs) - Math.min(...xs), bh = Math.max(...ys) - Math.min(...ys);
+    const k = clamp(Math.min((W - pad * 2) / bw, (H - top - pad) / bh, 1), .3, 1);
+    const cx = (Math.max(...xs) + Math.min(...xs)) / 2, cy = (Math.max(...ys) + Math.min(...ys)) / 2;
+    const t = d3.zoomIdentity.translate(-cx * k, -cy * k + (top - pad) / 2).scale(k);
+    (animate && !matchMedia('(prefers-reduced-motion: reduce)').matches ? svg.transition().duration(600) : svg).call(zoom.transform, t);
+  };
+  setTimeout(() => fitView(), 900);
 
   node.call(d3.drag().clickDistance(4)
     .on('start', (e, d) => { hideTip(); cancelAnimationFrame(flingRAF); if (!e.active) sim.alphaTarget(.15).restart(); d.fx = d.x; d.fy = d.y; d.trail = [{ x: d.x, y: d.y, t: performance.now() }]; })
@@ -1069,7 +1084,7 @@ function enterViewing(){
   closePanel();
   wrap.classList.add('viewing');
   document.documentElement.classList.add('viewing-mode');
-  zoomT = null;
+  zoomT = null; userZoomed = false;
   setTimeout(() => { drawGraph(); startDrift(); }, 80);
   $('#g-view-exit').focus();
 }
@@ -1079,7 +1094,7 @@ function exitViewing(){
   wrap.classList.remove('viewing');
   document.documentElement.classList.remove('viewing-mode');
   stopDrift();
-  zoomT = null;
+  zoomT = null; userZoomed = false;
   setTimeout(drawGraph, 80);
 }
 // 감상 모드 연출: star layers drift at two speeds, the constellation sways slowly, now and then a shooting star.
@@ -1867,8 +1882,9 @@ let tourI = 0, tourFresh = false;
 function startTour(fresh){
   tourFresh = fresh;
   realState = state;
-  demo = true; state = makeSample(); posCache.clear(); zoomT = null; panelNode = null;
+  demo = true; state = makeSample(); posCache.clear(); pinCache.clear(); zoomT = null; userZoomed = false; panelNode = null;
   closeModal(); tourI = 0;
+  go('graph');   // redraw now: the sky on screen still shows the viewer's own (often empty) data
   document.documentElement.classList.add('touring');
   $('#tour-root').innerHTML = `<div class="tour" role="dialog" aria-modal="true" aria-labelledby="tour-title"><div class="tour-spot" id="tour-spot"></div><div class="tour-card" id="tour-card"></div></div>`;
   showStep();
@@ -1927,7 +1943,7 @@ addEventListener('keydown', e => {
 function endTour(){
   $('#tour-root').innerHTML = '';
   document.documentElement.classList.remove('touring');
-  demo = false; posCache.clear(); zoomT = null; panelNode = null;
+  demo = false; posCache.clear(); pinCache.clear(); zoomT = null; userZoomed = false; panelNode = null;
   state = realState || emptyState(); realState = null;
   state.tutorialDone = true; save();
   go('graph');
