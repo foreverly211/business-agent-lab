@@ -98,7 +98,7 @@ button.chip:hover{border-color:var(--line)}
 
 /* sky */
 .sky{position:relative;background:radial-gradient(60% 55% at 18% 20%,rgba(70,90,255,.28),transparent 60%),radial-gradient(45% 50% at 88% 85%,rgba(47,211,255,.16),transparent 60%),radial-gradient(40% 45% at 70% 25%,rgba(190,120,255,.14),transparent 60%),radial-gradient(120% 90% at 50% 0%,#0d1530,#04060c 72%);border-radius:var(--r-tile);height:clamp(460px,72vh,780px);overflow:hidden;color:var(--sky-fg);color-scheme:dark}
-#graph-svg{width:100%;height:100%;display:block;cursor:grab}
+#graph-svg{position:relative;width:100%;height:100%;display:block;cursor:grab}
 #graph-svg:active{cursor:grabbing}
 .sky-tools{position:absolute;top:16px;left:16px;right:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;pointer-events:none}
 .sky-tools>*{pointer-events:auto}
@@ -108,13 +108,18 @@ button.chip:hover{border-color:var(--line)}
 .legend{position:absolute;left:16px;bottom:16px;display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--sky-dim);background:rgba(0,0,0,.35);padding:8px 12px;border-radius:12px;backdrop-filter:blur(8px)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .lg{width:10px;height:10px;border-radius:50%;display:inline-block}
-.sky-panel{position:absolute;top:64px;right:16px;bottom:16px;width:min(340px,calc(100% - 32px));background:rgba(20,22,30,.78);backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:20px;overflow:auto;display:flex;flex-direction:column;gap:14px;font-size:14px}
+#graph-bg{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.sky-tip{position:absolute;z-index:3;pointer-events:none;padding:6px 11px;border-radius:9px;background:rgba(245,245,247,.96);color:#0b1020;font-size:12.5px;font-weight:600;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.sky-tip small{font-weight:500;color:#5a6378;margin-left:6px}
+.sky-panel{position:absolute;z-index:2;left:16px;top:64px;width:min(320px,calc(100% - 32px));max-height:calc(100% - 32px);background:rgba(16,20,36,.92);box-shadow:0 24px 60px rgba(0,0,0,.55);backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:20px;overflow:auto;display:flex;flex-direction:column;gap:14px;font-size:14px}
 .sky-panel h3{font-size:20px}
 .sky-panel .muted{color:var(--sky-dim)}
 .sky-panel .chip{background:rgba(255,255,255,.12);color:var(--sky-fg)}
 .sky-panel .list-item{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid rgba(255,255,255,.08);background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;width:100%;font-size:14px}
 .sky-panel .list-item:hover{color:#fff}
 .sky-panel .close{position:absolute;top:12px;right:12px}
+.sky-panel{transition:left .15s,top .15s}
+@media (prefers-reduced-motion: reduce){.sky-panel{transition:none}}
 .sky-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:24px}
 .sky-empty>div{pointer-events:auto;text-align:center;max-width:420px;display:flex;flex-direction:column;gap:12px;align-items:center}
 .sky-empty h3{font-size:28px;font-weight:700}
@@ -713,7 +718,7 @@ const TYPE_LIGHT = { '공모전':'blue', '프로젝트':'violet', '수업':'viol
 const LIGHT_LEGEND = [['공모전','blue'],['수업 · 프로젝트','violet'],['동아리','lime'],['인턴','gold'],['대외활동','teal'],['봉사','orange'],['개인 경험·여행','pink'],['아르바이트 · 기타','silver']];
 const lightOf = e => TYPE_LIGHT[e.type] || 'silver';
 // Score 0.5–5 → radius ~3–14.5px; the curve widens the gap so big experiences stand out at a glance.
-const starRadius = sc => 2.5 + Math.pow(sc / 5, 1.4) * 12;
+const starRadius = sc => (2.5 + Math.pow(sc / 5, 1.4) * 12) * 1.25;
 const starOf = e => STARLIGHT[lightOf(e)];
 
 let sim = null, zoomT = null, showLabels = recall('labels') !== '0', showLines = recall('lines') !== '0';
@@ -754,25 +759,17 @@ function jumpToMatch(dir){
 function buildGraph(){
   const nodes = [], links = [], idx = new Map();
   const add = n => { if (!idx.has(n.id)) { idx.set(n.id, n); nodes.push(n); } return idx.get(n.id); };
-  for (const c of state.categories) add({ id:'c:' + c.id, type:'cat', label:c.name, ref:c });
-  for (const t of allTags()) {
-    const tn = add({ id:'t:' + norm(t.name), type:'tag', label:t.name, count:t.exps.length });
-    for (const cid of catsForTag(t.name)) links.push({ source: tn.id, target: 'c:' + cid, kind:'tc' });
-  }
+  for (const t of allTags()) add({ id:'t:' + norm(t.name), type:'tag', label:t.name, count:t.exps.length });
   for (const e of state.experiences) {
     add({ id:'e:' + e.id, type:'exp', label:e.title, ref:e });
     for (const t of e.tags) links.push({ source:'e:' + e.id, target:'t:' + norm(t), kind:'et' });
-    for (const cid of (e.catAdd || [])) if (catById(cid)) links.push({ source:'e:' + e.id, target:'c:' + cid, kind:'ec' });
   }
   for (const v of state.virtuals.filter(v => !v.realizedAt)) {
     add({ id:'v:' + v.id, type:'virt', label:v.label, ref:v });
     for (const l of v.links) if (idx.has('t:' + norm(l))) links.push({ source:'v:' + v.id, target:'t:' + norm(l), kind:'v' });
   }
   for (const n of nodes) {
-    if (n.type === 'exp') n.r = starRadius(score(n.ref));
-    else if (n.type === 'tag') n.r = 1.7 + Math.sqrt(n.count) * 0.55;
-    else if (n.type === 'cat') n.r = 26;
-    else n.r = 10;
+    n.r = n.type === 'exp' ? starRadius(score(n.ref)) : n.type === 'tag' ? 1.6 : 3;
     const p = posCache.get(n.id);
     if (p) { n.x = p.x; n.y = p.y; } else { n.x = (Math.random() - .5) * 300; n.y = (Math.random() - .5) * 300; }
   }
@@ -788,7 +785,9 @@ function renderGraphView(){
     n ? `경험 ${n}개가 저마다의 빛깔로 떠 있어요. 별의 색은 활동 유형, 크기와 밝기는 중요도와 성장이에요.${virt ? ` 아직 채우지 않은 관측 예정 별이 ${virt}개 있어요.` : ''}` : '경험을 기록하면 별이 떠요. 같은 태그를 가진 경험끼리 이어지며 나만의 별자리가 만들어져요.'
   ) + `
   <div class="sky" id="graph">
-    <svg id="graph-svg" role="img" aria-label="경험과 태그가 연결된 별자리 그래프"></svg>
+    <canvas id="graph-bg" aria-hidden="true"></canvas>
+    <svg id="graph-svg" role="img" aria-label="활동 유형별 구역으로 모인 경험 별자리. 별에 마우스를 올리면 이름, 누르면 상세 정보가 나와요."></svg>
+    <div class="sky-tip" id="graph-tip" hidden></div>
     <div class="sky-tools">
       <div class="sky-seg">
         <button data-new-record>+ 기록하기</button>
@@ -806,7 +805,7 @@ function renderGraphView(){
     </div>
     <div class="sky-panel" id="graph-panel" hidden></div>
     <div class="view-exit"><span class="hint">드래그해서 둘러보고, 휠로 확대해요</span><button class="sky-btn" id="g-view-exit">감상 끝내기 · Esc</button></div>
-    ${n ? '' : `<div class="sky-empty${state.categories.length || virt ? ' compact' : ''}"><div><h3>아직 하늘이 비어 있어요.</h3><p>첫 번째 경험을 기록하면 이곳에 별이 떠요. 거창하지 않아도 괜찮아요. 나에게 의미 있었던 일이면 충분해요.</p><button class="btn btn-primary" data-new-record>첫 경험 기록하기</button>${state.categories.length ? '' : '<button class="link" style="color:#2997ff" data-go="me">먼저 전공을 설정할래요</button>'}</div></div>`}
+    ${n ? '' : `<div class="sky-empty${virt ? ' compact' : ''}"><div><h3>아직 하늘이 비어 있어요.</h3><p>첫 번째 경험을 기록하면 이곳에 별이 떠요. 거창하지 않아도 괜찮아요. 나에게 의미 있었던 일이면 충분해요.</p><button class="btn btn-primary" data-new-record>첫 경험 기록하기</button>${state.categories.length ? '' : '<button class="link" style="color:#2997ff" data-go="me">먼저 전공을 설정할래요</button>'}</div></div>`}
   </div>
   <div class="tile starlight" id="graph-legend">
     <div><div class="eyebrow">별빛 읽기</div><h2 style="margin-top:4px">색은 활동 유형, 밝기는 그 경험의 무게예요.</h2></div>
@@ -814,10 +813,11 @@ function renderGraphView(){
     <div class="sl-marks">
       <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>선택한 별</span>
       <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#6aa8ff" fill-opacity=".25"/><circle cx="8" cy="8" r="3" fill="#6aa8ff"/></svg>더 크게 반짝이는 별 = 방금 기록한 별</span>
-      <span><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><ellipse cx="7" cy="8" rx="4.5" ry="6.5" fill="none" stroke="#5b8fd6" stroke-width="1.8" transform="rotate(25 7 8)"/></svg>관측 예정 별</span>
+      <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#c8d2ea" fill-opacity=".18"/><circle cx="8" cy="8" r="2.4" fill="#8e97ad"/></svg>희미한 별 = 관측 예정 별</span>
       <span><svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="3" fill="#8e97ad"/></svg>작은 회색 별 = 태그</span>
-      <span><svg width="74" height="30" viewBox="0 0 74 30" aria-hidden="true"><circle cx="6" cy="15" r="${starRadius(1).toFixed(1)}" fill="#6aa8ff"/><circle cx="26" cy="15" r="${starRadius(3).toFixed(1)}" fill="#6aa8ff"/><circle cx="57" cy="15" r="${starRadius(5).toFixed(1)}" fill="#6aa8ff"/></svg>크기 = 중요도·성장 평균 ★1 · ★3 · ★5</span>
-      <span>은은한 빛 속 큰 글자 = 전공 분야</span>
+      <span><svg width="84" height="38" viewBox="0 0 84 38" aria-hidden="true"><circle cx="7" cy="19" r="${starRadius(1).toFixed(1)}" fill="#6aa8ff"/><circle cx="30" cy="19" r="${starRadius(3).toFixed(1)}" fill="#6aa8ff"/><circle cx="64" cy="19" r="${starRadius(5).toFixed(1)}" fill="#6aa8ff"/></svg>크기 = 중요도·성장 평균 ★1 · ★3 · ★5</span>
+      <span><svg width="26" height="16" viewBox="0 0 26 16" aria-hidden="true"><ellipse cx="13" cy="8" rx="11" ry="6" fill="#6aa8ff" fill-opacity=".12" stroke="#6aa8ff" stroke-dasharray="3 3"/></svg>점선 구역 = 같은 활동 유형</span>
+      <span>마우스를 올리면 이름, 누르면 상세 정보</span>
     </div>
   </div>`;
   $('#g-labels').onclick = e => { showLabels = !showLabels; remember('labels', showLabels ? '1' : '0'); e.currentTarget.setAttribute('aria-pressed', showLabels); if (typeof d3 !== 'undefined') d3.selectAll('#graph-svg .lbl').attr('display', d => labelVisible(d) ? null : 'none'); };
@@ -834,38 +834,85 @@ function renderGraphView(){
   $('#g-add-virt').onclick = () => openVirtualForm();
   requestAnimationFrame(drawGraph);
 }
-const labelVisible = d => showLabels || d.type === 'cat' || d.type === 'virt';
+const labelVisible = d => showLabels || d.type === 'virt';
+
+// Photo-like ground (survey style): warm black, dense small stars, tiny orange galaxies, blue halo stars.
+// Painted once per size on a canvas under the SVG so thousands of dots cost nothing while dragging.
+function paintSkyGround(W, H){
+  const cv = $('#graph-bg'); if (!cv) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  let seed = 4321; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+  const blob = (cx, cy, r, c, a) => { const g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, rgba(c, a)); g.addColorStop(1, rgba(c, 0)); x.fillStyle = g; x.fillRect(cx - r, cy - r, r * 2, r * 2); };
+  const area = W * H / (1280 * 820);
+  const bg = x.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#0c0908'); bg.addColorStop(1, '#070506');
+  x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  x.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 60 * area; i++) blob(rnd() * W, rnd() * H, 60 + rnd() * 140, [120, 70, 40], 0.025);
+  const tints = [[255, 255, 255], [255, 255, 255], [200, 220, 255], [255, 226, 180], [255, 196, 140]];
+  for (let i = 0; i < 1900 * area; i++) { const c = tints[Math.floor(rnd() * tints.length)]; x.fillStyle = rgba(c, 0.3 + rnd() * 0.55); x.beginPath(); x.arc(rnd() * W, rnd() * H, Math.pow(rnd(), 3) * 1.3 + 0.25, 0, 7); x.fill(); }
+  for (let i = 0; i < 70 * area; i++) { const gx = rnd() * W, gy = rnd() * H, rr = 1.5 + rnd() * 3; x.save(); x.translate(gx, gy); x.rotate(rnd() * 3); x.scale(1, 0.45 + rnd() * 0.4); blob(0, 0, rr * 2.2, [255, 170, 90], 0.45); x.restore(); }
+  for (let i = 0; i < 18 * area; i++) { const gx = rnd() * W, gy = rnd() * H, rr = 3 + rnd() * 7; blob(gx, gy, rr * 4, [120, 160, 255], 0.18); blob(gx, gy, rr, [230, 240, 255], 0.75); }
+}
+// screen position of a graph node inside the sky box
+function skyPoint(d){
+  const wrap = $('#graph'); if (!wrap) return { x: 0, y: 0 };
+  const t = zoomT || { x: 0, y: 0, k: 1 };
+  return { x: wrap.clientWidth / 2 + t.x + d.x * t.k, y: wrap.clientHeight / 2 + t.y + d.y * t.k, k: t.k };
+}
+function showTip(d){
+  const tip = $('#graph-tip'); if (!tip || $('#graph.viewing')) return;
+  if (d.type === 'exp') tip.innerHTML = `${esc(d.label)}<small>${esc(d.ref.type)} · ${d.ref.date.slice(0, 7).replace('-', '.')}</small>`;
+  else if (d.type === 'tag') tip.innerHTML = `${esc(d.label)}<small>태그 · 경험 ${d.count}개</small>`;
+  else tip.innerHTML = `${esc(d.label)}<small>관측 예정</small>`;
+  const p = skyPoint(d), off = (d.type === 'exp' ? d.r * 1.6 : 8) * p.k + 8;
+  tip.hidden = false;
+  const W = $('#graph').clientWidth;
+  tip.style.left = Math.min(W - tip.offsetWidth - 8, p.x + off) + 'px';
+  tip.style.top = Math.max(8, p.y - off - tip.offsetHeight) + 'px';
+}
+function hideTip(){ const tip = $('#graph-tip'); if (tip) tip.hidden = true; }
+function placePanel(){
+  const p = $('#graph-panel'), wrap = $('#graph');
+  if (!p || p.hidden || !graphApi || !panelNode || !wrap) return;
+  const d = graphApi.nodes.find(n => n.id === panelNode); if (!d) return;
+  const pt = skyPoint(d), off = (d.type === 'exp' ? d.r * 2.4 : 10) * pt.k + 22, W = wrap.clientWidth, H = wrap.clientHeight, w = p.offsetWidth;
+  const left = pt.x + off + w < W - 16 ? pt.x + off : pt.x - off - w;
+  p.style.left = clamp(left, 16, W - w - 16) + 'px';
+  p.style.top = clamp(pt.y - 120, 64, Math.max(64, H - p.offsetHeight - 16)) + 'px';
+}
 
 function drawGraph(){
   const wrap = $('#graph'); if (!wrap || !wrap.clientWidth) return;
   if (typeof d3 === 'undefined') { $('#graph-svg').outerHTML = '<p style="padding:80px 24px;text-align:center;color:var(--sky-dim)">그래프 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인한 뒤 새로고침해 주세요.</p>'; return; }
   const W = wrap.clientWidth, H = wrap.clientHeight;
+  paintSkyGround(W, H);
+  hideTip();
   if (sim) { sim.stop(); sim.nodes().forEach(n => posCache.set(n.id, { x: n.x, y: n.y })); }
   const { nodes, links } = buildGraph();
   const svg = d3.select('#graph-svg').attr('viewBox', [-W/2, -H/2, W, H]);
   svg.selectAll('*').remove();
   const defs = svg.append('defs');
   for (const [k, [c]] of Object.entries(STARLIGHT)) {
-    const g = defs.append('radialGradient').attr('id', 'bl-' + k);
-    g.append('stop').attr('offset', '0%').attr('stop-color', c).attr('stop-opacity', .5);
-    g.append('stop').attr('offset', '45%').attr('stop-color', c).attr('stop-opacity', .16);
-    g.append('stop').attr('offset', '100%').attr('stop-color', c).attr('stop-opacity', 0);
+    const h = defs.append('radialGradient').attr('id', 'halo-' + k);
+    h.append('stop').attr('offset', '0%').attr('stop-color', c).attr('stop-opacity', 1);
+    h.append('stop').attr('offset', '100%').attr('stop-color', c).attr('stop-opacity', 0);
+    const z = defs.append('radialGradient').attr('id', 'zone-' + k);
+    z.append('stop').attr('offset', '0%').attr('stop-color', c).attr('stop-opacity', .11);
+    z.append('stop').attr('offset', '100%').attr('stop-color', c).attr('stop-opacity', .02);
   }
-  const neb = defs.append('radialGradient').attr('id', 'neb');
-  neb.append('stop').attr('offset', '0%').attr('stop-color', '#8fb0ff').attr('stop-opacity', .2);
-  neb.append('stop').attr('offset', '100%').attr('stop-color', '#8fb0ff').attr('stop-opacity', 0);
-  defs.append('filter').attr('id', 'lglow').attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%')
-    .append('feGaussianBlur').attr('stdDeviation', 2.5);
-  defs.append('filter').attr('id', 'mw').attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%')
-    .append('feGaussianBlur').attr('stdDeviation', 30);
+  const core = defs.append('radialGradient').attr('id', 'core-w');
+  core.append('stop').attr('offset', '0%').attr('stop-color', '#fff').attr('stop-opacity', 1);
+  core.append('stop').attr('offset', '55%').attr('stop-color', '#fff').attr('stop-opacity', .85);
+  core.append('stop').attr('offset', '100%').attr('stop-color', '#fff').attr('stop-opacity', 0);
 
-  // fixed star field (seeded so it doesn't jump between renders)
+  // a few brighter stars in two layers; they drift in 감상 mode over the painted ground
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const tints = ['#ffffff', '#ffffff', '#d7e6ff', '#ffe6c4', '#cfe0ff', '#ffd9a8'];
   const bg = svg.append('g').attr('aria-hidden', 'true');
-  bg.append('ellipse').attr('rx', Math.max(W, H) * .09).attr('ry', Math.max(W, H) * .7).attr('fill', '#c9d3f0').attr('fill-opacity', .07)
-    .attr('filter', 'url(#mw)').attr('transform', 'rotate(-24)');
-  const count = Math.round(W * H / 2600);
+  const count = Math.round(W * H / 6000);
   skyLayers = [{ speed: 5, share: .65, near: false }, { speed: 12, share: .35, near: true }].map(L => {
     const layer = bg.append('g'), stars = [];
     for (let i = 0; i < count * L.share; i++) {
@@ -879,62 +926,78 @@ function drawGraph(){
   });
 
   const g = svg.append('g').attr('id', 'drift').append('g');
-  const zoom = d3.zoom().scaleExtent([.25, 4]).on('zoom', e => { zoomT = e.transform; g.attr('transform', e.transform); });
+  const zoom = d3.zoom().scaleExtent([.25, 4]).on('zoom', e => { zoomT = e.transform; g.attr('transform', e.transform); hideTip(); placePanel(); });
   svg.call(zoom).on('dblclick.zoom', null);
   svg.call(zoom.transform, zoomT || d3.zoomIdentity);
   svg.on('click', e => { if (e.target === svg.node()) closePanel(); });
   svg.append('g').attr('id', 'shooting').attr('aria-hidden', 'true');
 
-  const nebula = g.append('g').attr('aria-hidden', 'true').selectAll('circle').data(nodes.filter(n => n.type === 'cat')).join('circle')
-    .attr('r', 110).attr('fill', 'url(#neb)').style('pointer-events', 'none');
+  // activity-type zones: experiences of one type gather, and a dashed zone with the type name wraps them
+  const types = uniq(nodes.filter(n => n.type === 'exp').map(n => lightOf(n.ref)));
+  const typeName = Object.fromEntries(LIGHT_LEGEND.map(([name, k]) => [k, name]));
+  const cols = Math.min(4, types.length), rows = Math.ceil(types.length / Math.max(cols, 1));
+  const anchor = {};
+  types.forEach((k, i) => { anchor[k] = { x: ((i % cols) - (cols - 1) / 2) * 300, y: (Math.floor(i / cols) - (rows - 1) / 2) * 280 }; });
+  const zoneG = g.append('g').attr('aria-hidden', 'true').selectAll('g').data(types).join('g');
+  zoneG.append('ellipse').attr('fill', k => `url(#zone-${k})`).attr('stroke', k => STARLIGHT[k][0]).attr('stroke-opacity', .5)
+    .attr('stroke-width', 1.2).attr('stroke-dasharray', '4 6');
+  zoneG.append('text').attr('text-anchor', 'middle').attr('font-size', 13).attr('font-weight', 700)
+    .attr('fill', k => STARLIGHT[k][0]).attr('fill-opacity', .95)
+    .style('paint-order', 'stroke').style('stroke', 'rgba(7,5,6,.8)').style('stroke-width', '4px')
+    .text(k => typeName[k] || '');
+  const placeZones = () => zoneG.each(function(k){
+    const m = nodes.filter(n => n.type === 'exp' && lightOf(n.ref) === k); if (!m.length) return;
+    const cx = m.reduce((a, n) => a + n.x, 0) / m.length, cy = m.reduce((a, n) => a + n.y, 0) / m.length;
+    const rx = Math.max(80, ...m.map(n => Math.abs(n.x - cx) + n.r * 2.6 + 40)), ry = Math.max(64, ...m.map(n => Math.abs(n.y - cy) + n.r * 2.6 + 34));
+    const z = d3.select(this);
+    z.select('ellipse').attr('cx', cx).attr('cy', cy).attr('rx', rx).attr('ry', ry);
+    z.select('text').attr('x', cx).attr('y', cy - ry - 8);
+  });
 
   const linkG = g.append('g').attr('id', 'graph-links');
-  const solid = links.filter(l => l.kind === 'et' || l.kind === 'ec');
+  const solid = links.filter(l => l.kind === 'et');
   const glow = linkG.append('g').attr('filter', 'url(#lglow)').selectAll('line').data(solid).join('line').attr('class', 'lnk')
-    .attr('stroke', '#9fb6ea').attr('stroke-opacity', .22).attr('stroke-width', 6).attr('stroke-linecap', 'round');
+    .attr('stroke', '#9fb6ea').attr('stroke-opacity', .12).attr('stroke-width', 5).attr('stroke-linecap', 'round');
+  defs.append('filter').attr('id', 'lglow').attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%')
+    .append('feGaussianBlur').attr('stdDeviation', 2.5);
   const link = linkG.append('g').selectAll('line').data(links).join('line').attr('class', 'lnk')
-    .attr('stroke', d => d.kind === 'v' ? '#9fc4f5' : d.kind === 'tc' ? '#8fa6d6' : '#b4c6f0')
-    .attr('stroke-opacity', d => d.kind === 'v' ? .75 : d.kind === 'tc' ? .3 : .72)
-    .attr('stroke-width', d => d.kind === 'tc' ? 1 : d.kind === 'v' ? 1.6 : 1.8)
-    .attr('stroke-dasharray', d => d.kind === 'v' ? '4 5' : d.kind === 'tc' ? '1 5' : null)
+    .attr('stroke', d => d.kind === 'v' ? '#c8d2eb' : '#bccbef')
+    .attr('stroke-opacity', d => d.kind === 'v' ? .35 : .4)
+    .attr('stroke-width', d => d.kind === 'v' ? 1 : 1.2)
+    .attr('stroke-dasharray', d => d.kind === 'v' ? '3 4' : null)
     .attr('stroke-linecap', 'round');
 
   const node = g.append('g').selectAll('g').data(nodes).join('g').attr('class', 'node')
-    .attr('tabindex', 0).attr('role', 'button').attr('aria-label', d => ({exp:'경험', tag:'태그', cat:'전공 분야', virt:'관측 예정 별'}[d.type]) + ' ' + d.label);
+    .attr('tabindex', 0).attr('role', 'button').attr('aria-label', d => ({exp:'경험', tag:'태그', virt:'관측 예정 별'}[d.type]) + ' ' + d.label);
   node.each(function(d){
     const s = d3.select(this);
+    const ret = o => { const q = 8; return `M${-o} ${-o + q}V${-o}H${-o + q}M${o - q} ${-o}H${o}V${-o + q}M${o} ${o - q}V${o}H${o - q}M${-o + q} ${o}H${-o}V${o - q}`; };
     if (d.type === 'exp') {
-      const [c, light] = starOf(d.ref), k = lightOf(d.ref), o = d.r + 7, q = 5;
-      s.append('circle').attr('r', d.r * 2.6 + 6).attr('fill', `url(#bl-${k})`);
-      if (d.ref.id === justAdded) {
-        s.append('circle').attr('class', 'newbloom').attr('r', d.r * 4.5 + 10).attr('fill', `url(#bl-${k})`);
-        s.append('circle').attr('r', d.r * 3).attr('fill', `url(#bl-${k})`);
-      }
-      s.append('circle').attr('r', d.r).attr('fill', c).style('filter', `drop-shadow(0 0 ${d.r * .7}px ${c})`);
-      s.append('circle').attr('r', d.r * .42).attr('fill', '#fff');
-      s.append('path').attr('class', 'ret').attr('d', `M${-o} ${-o + q}V${-o}H${-o + q}M${o - q} ${-o}H${o}V${-o + q}M${o} ${o - q}V${o}H${o - q}M${-o + q} ${o}H${-o}V${o - q}`);
-      s.append('text').attr('class', 'lbl').attr('x', d.r + 7).attr('y', 4.5).attr('fill', light)
-        .attr('font-size', 13).attr('font-weight', 600).attr('display', labelVisible(d) ? null : 'none')
-        .text(d.label.length > 16 ? d.label.slice(0, 15) + '…' : d.label);
+      // halo star, like the survey photo: wide soft glow, tighter glow, bright white core
+      const k = lightOf(d.ref);
+      s.append('circle').attr('r', d.r * 2 + 6).attr('fill', 'transparent');
+      if (d.ref.id === justAdded) s.append('circle').attr('class', 'newbloom').attr('r', d.r * 8).attr('fill', `url(#halo-${k})`).attr('opacity', .3);
+      s.append('circle').attr('r', d.r * 6).attr('fill', `url(#halo-${k})`).attr('opacity', .28).style('mix-blend-mode', 'screen');
+      s.append('circle').attr('r', d.r * 2.6).attr('fill', `url(#halo-${k})`).attr('opacity', .45).style('mix-blend-mode', 'screen');
+      s.append('circle').attr('r', d.r * 1.1).attr('fill', 'url(#core-w)').attr('opacity', .95);
+      s.append('path').attr('class', 'ret').attr('d', ret(d.r * 2.2 + 8));
     } else if (d.type === 'tag') {
-      s.append('circle').attr('r', d.r + 6).attr('fill', 'transparent');
-      s.append('circle').attr('r', d.r).attr('fill', '#d5ddef').attr('fill-opacity', .85);
-      s.append('text').attr('class', 'lbl').attr('x', d.r + 4).attr('y', -3).attr('fill', '#b3bfd9').attr('fill-opacity', .8)
+      s.append('circle').attr('r', 9).attr('fill', 'transparent');
+      s.append('circle').attr('r', 6).attr('fill', 'url(#halo-silver)').attr('opacity', .35);
+      s.append('circle').attr('r', 1.5).attr('fill', '#fff');
+      s.append('path').attr('class', 'ret').attr('d', ret(11));
+      s.append('text').attr('class', 'lbl').attr('x', 9).attr('y', -7).attr('fill', 'rgba(200,210,230,.75)')
         .attr('font-size', 10.5).attr('display', labelVisible(d) ? null : 'none').text(d.label);
-    } else if (d.type === 'cat') {
-      s.append('circle').attr('r', d.r).attr('fill', 'transparent');
-      s.append('path').attr('class', 'ret').attr('d', 'M-34 -14V-20H-28M28 -20H34V-14M34 14V20H28M-28 20H-34V14');
-      s.append('text').attr('class', 'lbl').attr('y', 4).attr('text-anchor', 'middle').attr('fill', '#9fb4e0').attr('fill-opacity', .85)
-        .attr('font-size', 12.5).attr('font-weight', 600).attr('letter-spacing', '.06em').text(d.label);
     } else {
-      s.append('circle').attr('r', 12).attr('fill', 'transparent');
-      s.append('ellipse').attr('rx', 6).attr('ry', 10).attr('transform', 'rotate(25)').attr('fill', 'rgba(127,176,255,.08)')
-        .attr('stroke', '#7fb0ff').attr('stroke-width', 1.8);
-      s.append('path').attr('class', 'ret').attr('d', 'M-16 -11V-16H-11M11 -16H16V-11M16 11V16H11M-11 16H-16V11');
-      s.append('text').attr('class', 'lbl').attr('x', 14).attr('y', 4).attr('fill', '#9fc4f5').attr('font-size', 12)
+      // planned star: faint, not-yet-lit, no ring
+      s.append('circle').attr('r', 12).attr('fill', 'url(#halo-silver)').attr('opacity', .18);
+      s.append('circle').attr('r', 2.6).attr('fill', 'rgba(220,228,245,.55)');
+      s.append('path').attr('class', 'ret').attr('d', ret(14));
+      s.append('text').attr('class', 'lbl').attr('x', 10).attr('y', 4).attr('fill', 'rgba(200,210,230,.7)').attr('font-size', 11.5)
         .text(d.label + ' · 관측 예정');
     }
   });
+  node.selectAll('text').style('paint-order', 'stroke').style('stroke', 'rgba(7,5,6,.8)').style('stroke-width', '3px');
 
   const adj = new Map(nodes.map(n => [n.id, new Set([n.id])]));
   for (const l of links) { adj.get(l.source)?.add(l.target); adj.get(l.target)?.add(l.source); }
@@ -947,7 +1010,7 @@ function drawGraph(){
   };
   graphFocus = focus; graphApi = { svg, zoom, node, linkG, nodes }; focus(null);
 
-  node.on('mouseenter', (e, d) => focus(d.id)).on('mouseleave', () => focus(panelNode))
+  node.on('mouseenter', (e, d) => { focus(d.id); showTip(d); }).on('mouseleave', () => { focus(panelNode); hideTip(); })
     .on('click', (e, d) => { e.stopPropagation(); openPanel(d); focus(d.id); })
     .on('keydown', (e, d) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPanel(d); focus(d.id); } });
 
@@ -960,21 +1023,24 @@ function drawGraph(){
   for (const n of nodes) { const p = pinCache.get(n.id); if (p) { n.fx = p.x; n.fy = p.y; } }
   sim = d3.forceSimulation(nodes).velocityDecay(.5)
     .force('link', d3.forceLink(links).id(d => d.id)
-      .distance(l => l.kind === 'tc' ? 110 : l.kind === 'v' ? 80 : 72)
-      .strength(l => (l.kind === 'tc' ? .25 : l.kind === 'v' ? .5 : .7) / Math.min(deg[idOf(l.source)] || 1, deg[idOf(l.target)] || 1)))
-    .force('charge', d3.forceManyBody().strength(d => d.type === 'cat' ? -480 : d.type === 'exp' ? -300 : -130).distanceMax(520))
-    .force('collide', d3.forceCollide(d => d.type === 'cat' ? 52 : d.type === 'exp' ? d.r + 14 : d.type === 'virt' ? 18 : 9))
-    .force('x', d3.forceX(0).strength(.025)).force('y', d3.forceY(state.experiences.length ? 0 : -H * .16).strength(.035))
+      .distance(l => l.kind === 'v' ? 70 : 80)
+      .strength(l => (l.kind === 'v' ? .5 : .45) / Math.min(deg[idOf(l.source)] || 1, deg[idOf(l.target)] || 1)))
+    .force('charge', d3.forceManyBody().strength(d => d.type === 'exp' ? -320 : -110).distanceMax(520))
+    .force('collide', d3.forceCollide(d => d.type === 'exp' ? d.r * 1.6 + 14 : d.type === 'virt' ? 18 : 10))
+    // each experience is pulled toward its activity type's spot, so types form clusters
+    .force('x', d3.forceX(d => d.type === 'exp' ? anchor[lightOf(d.ref)].x : 0).strength(d => d.type === 'exp' ? .07 : .015))
+    .force('y', d3.forceY(d => d.type === 'exp' ? anchor[lightOf(d.ref)].y : (state.experiences.length ? 0 : -H * .16)).strength(d => d.type === 'exp' ? .07 : .02))
     .on('tick', () => {
       for (const sel of [link, glow]) sel.attr('x1', d => ends(d)[0]).attr('y1', d => ends(d)[1]).attr('x2', d => ends(d)[2]).attr('y2', d => ends(d)[3]);
-      nebula.attr('cx', d => d.x).attr('cy', d => d.y);
       node.attr('transform', d => `translate(${d.x},${d.y})`);
+      placeZones();
+      if (panelNode) placePanel();
     })
     .on('end', () => nodes.forEach(n => posCache.set(n.id, { x: n.x, y: n.y })));
   if (nodes.every(n => posCache.has(n.id))) sim.alpha(.25);
 
   node.call(d3.drag().clickDistance(4)
-    .on('start', (e, d) => { cancelAnimationFrame(flingRAF); if (!e.active) sim.alphaTarget(.15).restart(); d.fx = d.x; d.fy = d.y; d.trail = [{ x: d.x, y: d.y, t: performance.now() }]; })
+    .on('start', (e, d) => { hideTip(); cancelAnimationFrame(flingRAF); if (!e.active) sim.alphaTarget(.15).restart(); d.fx = d.x; d.fy = d.y; d.trail = [{ x: d.x, y: d.y, t: performance.now() }]; })
     .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; d.trail.push({ x: e.x, y: e.y, t: performance.now() }); if (d.trail.length > 8) d.trail.shift(); })
     // A slow drop pins the star where it lands (double-click frees it). A quick flick throws it:
     // it keeps its release speed and glides like it is in space, then settles and stays.
@@ -1082,7 +1148,7 @@ function openPanel(d){
       ${v.links.length ? `<div class="chips">${v.links.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>` : ''}
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" id="gp-fill">이 경험 기록하기</button><button class="sky-btn" id="gp-del">삭제</button></div>`;
   }
-  p.innerHTML = h; p.hidden = false;
+  p.innerHTML = h; p.hidden = false; placePanel();
   $('#gp-close').onclick = closePanel;
   const f = $('#gp-filter'); if (f) f.onclick = () => { recQ = d.label; go('records'); };
   const fill = $('#gp-fill'); if (fill) fill.onclick = () => openEditor(null, { tags: [d.ref.label] });
@@ -1787,8 +1853,8 @@ function openWelcome(next){
 /* ================= TOUR ================= */
 const TOUR = [
   { title:'MYkrokosmos', text:'나만의 작은 우주예요. 지금까지 무엇을 해 왔는지, 나는 어떤 사람인지, 앞으로 무엇을 채워야 하는지 스스로 발견하는 경험 기록 서비스예요. 예시 학생 ‘한별’의 별자리로 먼저 둘러볼게요.' },
-  { view:'graph', target:'#graph', explore:'#graph-svg, #gp-close', title:'경험이 별이 돼요', text:'기록한 경험은 밝은 별, 경험에서 나온 태그는 작은 회색 별이 돼요. 같은 태그를 가진 경험끼리 별자리 선으로 이어져요. 지금 별을 눌러 보거나, 끌어서 움직이거나, 휠로 확대해 보세요.' },
-  { view:'graph', target:'#graph-legend', title:'별빛 읽기', text:'별의 색은 활동 유형이에요. 중요도와 성장 별점이 클수록 별이 크고 밝아져요. 전공 분야는 은은한 빛 속 큰 글자로, 앞으로 채우고 싶은 경험은 파란 타원의 관측 예정 별로 보여요.' },
+  { view:'graph', target:'#graph', explore:'#graph-svg, #gp-close', title:'경험이 별이 돼요', text:'기록한 경험은 빛나는 별이 되고, 같은 활동 유형끼리 점선 구역에 모여요. 별에 마우스를 올리면 이름이, 누르면 자세한 정보가 나와요. 끌어서 움직이거나 휠로 확대해 보세요.' },
+  { view:'graph', target:'#graph-legend', title:'별빛 읽기', text:'별의 색은 활동 유형이에요. 중요도와 성장 별점이 클수록 별이 크고 밝아져요. 같은 활동 유형끼리 점선 구역에 모이고, 앞으로 채우고 싶은 경험은 희미한 관측 예정 별로 보여요.' },
   { view:'graph', target:'#btn-record', title:'언제든 기록하기', text:'정해진 양식 없이 자유롭게 쓰면 돼요. 내용에서 태그를 추천하고, 막힐 때는 생각을 돕는 질문을 건네요. 어떤 태그를 달지는 당신이 정해요.' },
   { view:'records', target:'#records-grid', title:'모든 기록을 한곳에', text:'쌓인 경험을 검색하고, 중요도나 성장 순으로 다시 볼 수 있어요.' },
   { view:'ability', target:'#ability-main', title:'능력치', text:'경험의 개수가 아니라 실제로 성장했다고 느낀 정도를 더해 계산해요. 자주 한 것과 크게 성장한 것이 다를 수도 있어요.' },
