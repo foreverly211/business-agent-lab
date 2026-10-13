@@ -718,7 +718,7 @@ const starOf = e => STARLIGHT[lightOf(e)];
 
 let sim = null, zoomT = null, showLabels = recall('labels') !== '0', showLines = recall('lines') !== '0';
 const posCache = new Map(), pinCache = new Map();
-let flingTimer = null;
+let flingRAF = null;
 let panelNode = null;
 let justAdded = null;
 let graphFocus = null, graphApi = null;
@@ -974,7 +974,7 @@ function drawGraph(){
   if (nodes.every(n => posCache.has(n.id))) sim.alpha(.25);
 
   node.call(d3.drag().clickDistance(4)
-    .on('start', (e, d) => { if (!e.active) sim.alphaTarget(.15).restart(); d.fx = d.x; d.fy = d.y; d.trail = [{ x: d.x, y: d.y, t: performance.now() }]; })
+    .on('start', (e, d) => { cancelAnimationFrame(flingRAF); if (!e.active) sim.alphaTarget(.15).restart(); d.fx = d.x; d.fy = d.y; d.trail = [{ x: d.x, y: d.y, t: performance.now() }]; })
     .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; d.trail.push({ x: e.x, y: e.y, t: performance.now() }); if (d.trail.length > 8) d.trail.shift(); })
     // A slow drop pins the star where it lands (double-click frees it). A quick flick throws it:
     // it keeps its release speed and glides like it is in space, then settles and stays.
@@ -982,13 +982,18 @@ function drawGraph(){
       if (!e.active) sim.alphaTarget(0);
       const now = performance.now(), recent = d.trail.filter(p => now - p.t < 110), a = recent[0], b = recent[recent.length - 1];
       const dt = a && b ? Math.max(b.t - a.t, 1) : 1, vx = a && b ? (b.x - a.x) / dt : 0, vy = a && b ? (b.y - a.y) / dt : 0;
-      if (Math.hypot(vx, vy) < .35 || matchMedia('(prefers-reduced-motion: reduce)').matches) { pinCache.set(d.id, { x: d.fx, y: d.fy }); return; }
-      const cap = 45, k = 16 * 1.15;
-      d.fx = d.fy = null; pinCache.delete(d.id);
-      d.vx = clamp(vx * k, -cap, cap); d.vy = clamp(vy * k, -cap, cap);
-      sim.velocityDecay(.1).alpha(.7).restart();
-      clearTimeout(flingTimer);
-      flingTimer = setTimeout(() => { sim.velocityDecay(.5); pinCache.set(d.id, { x: d.x, y: d.y }); d.fx = d.x; d.fy = d.y; }, 1400);
+      if (Math.hypot(vx, vy) < .25 || matchMedia('(prefers-reduced-motion: reduce)').matches) { pinCache.set(d.id, { x: d.fx, y: d.fy }); return; }
+      // Glide under our own inertia (springs would just pull it back): speed eases off each frame,
+      // the neighbours follow along, and the star stays wherever it comes to rest.
+      let gx = clamp(vx * 16, -32, 32), gy = clamp(vy * 16, -32, 32);
+      cancelAnimationFrame(flingRAF);
+      sim.alphaTarget(.12).restart();
+      const glide = () => {
+        d.fx += gx; d.fy += gy; gx *= .94; gy *= .94;
+        if (Math.hypot(gx, gy) > .08) { flingRAF = requestAnimationFrame(glide); return; }
+        pinCache.set(d.id, { x: d.fx, y: d.fy }); sim.alphaTarget(0);
+      };
+      flingRAF = requestAnimationFrame(glide);
     }));
   node.on('dblclick', (e, d) => { e.stopPropagation(); pinCache.delete(d.id); d.fx = null; d.fy = null; sim.alpha(.3).restart(); });
   if (panelNode) { const pn = nodes.find(n => n.id === panelNode); if (pn) { openPanel(pn); focus(pn.id); } else closePanel(); }
