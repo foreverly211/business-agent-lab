@@ -985,12 +985,12 @@ function drawGraph(){
       if (Math.hypot(vx, vy) < .25 || matchMedia('(prefers-reduced-motion: reduce)').matches) { pinCache.set(d.id, { x: d.fx, y: d.fy }); return; }
       // Glide under our own inertia (springs would just pull it back): speed eases off each frame,
       // the neighbours follow along, and the star stays wherever it comes to rest.
-      let gx = clamp(vx * 2.5, -5, 5), gy = clamp(vy * 2.5, -5, 5);   // slow start, long easy drift (~3s)
+      let gx = clamp(vx * 1.25, -2.5, 2.5), gy = clamp(vy * 1.25, -2.5, 2.5);   // slow, long easy drift (~5s)
       cancelAnimationFrame(flingRAF);
       sim.alphaTarget(.12).restart();
       const glide = () => {
-        d.fx += gx; d.fy += gy; gx *= .981; gy *= .981;
-        if (Math.hypot(gx, gy) > .08) { flingRAF = requestAnimationFrame(glide); return; }
+        d.fx += gx; d.fy += gy; gx *= .9906; gy *= .9906;
+        if (Math.hypot(gx, gy) > .04) { flingRAF = requestAnimationFrame(glide); return; }
         pinCache.set(d.id, { x: d.fx, y: d.fy }); sim.alphaTarget(0);
       };
       flingRAF = requestAnimationFrame(glide);
