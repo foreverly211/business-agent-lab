@@ -985,7 +985,7 @@ function drawGraph(){
       if (Math.hypot(vx, vy) < .25 || matchMedia('(prefers-reduced-motion: reduce)').matches) { pinCache.set(d.id, { x: d.fx, y: d.fy }); return; }
       // Glide under our own inertia (springs would just pull it back): speed eases off each frame,
       // the neighbours follow along, and the star stays wherever it comes to rest.
-      let gx = clamp(vx * 16, -32, 32), gy = clamp(vy * 16, -32, 32);
+      let gx = clamp(vx * 4, -8, 8), gy = clamp(vy * 4, -8, 8);   // about a quarter of a full-speed throw
       cancelAnimationFrame(flingRAF);
       sim.alphaTarget(.12).restart();
       const glide = () => {
