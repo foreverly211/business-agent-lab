@@ -1867,15 +1867,15 @@ function openWelcome(next){
 
 /* ================= TOUR ================= */
 const TOUR = [
-  { title:'MYkrokosmos', text:'경험을 하나의 별로 기록해 별자리를 채워 가는\n나만의 작은 우주예요.\n예시 학생 ‘한별’의 하늘로 먼저 둘러볼게요.' },
-  { view:'graph', target:'#graph', explore:'#graph-svg, #gp-close', title:'경험이 별이 돼요', text:'기록한 경험은 별이 되어 유형별로 모여요.\n올리면 이름, 누르면 상세 정보가 보여요.\n지금 끌어 보거나 휠로 확대해 보세요.' },
+  { title:'MYkrokosmos', text:'경험을 하나의 별로 기록해 별자리를 채워가는\n나만의 작은 우주예요.\n예시로 먼저 둘러볼게요.' },
+  { view:'graph', target:'#graph', explore:'#graph-svg, #gp-close', title:'경험이 별이 돼요', text:'기록한 경험은 별이 되어 유형별로 모여요.\n마우스를 올리면 이름, 누르면 상세 정보가 보여요.\n지금 마우스로 클릭해 별을 움직여보거나\n휠로 확대해 보세요.' },
   { view:'graph', target:'#graph-legend', title:'별빛 읽기', text:'색은 활동 유형, 크기는 중요도와 성장이에요.\n희미한 별은 앞으로 채울 관측 예정 별이에요.' },
-  { view:'graph', target:'#btn-record', title:'언제든 기록하기', text:'활동에 대한 내용을 일기 쓰듯 자유롭게 작성하면 태그를 자동으로 추천해 줘요.\n막히면 생각을 돕는 질문을 건네요.' },
+  { view:'graph', target:'#btn-record', title:'언제든 기록하기', text:'활동에 대한 내용을 일기를 쓰듯 자유롭게 작성하면 태그를 자동으로 추천해줘요.\n막히면 생각을 돕는 질문을 건네요.' },
   { view:'records', target:'#records-grid', title:'모든 기록을 한곳에', text:'쌓인 경험을 검색하고\n중요도·성장 순으로 다시 볼 수 있어요.' },
   { view:'ability', target:'#ability-main', title:'능력치', text:'횟수가 아니라 성장한 정도로 능력치를 반영해요.\n주된 활동과 성장치를 비교해 보세요.' },
-  { view:'timeline', target:'#timeline-chart-wrap', title:'타임라인', text:'어느 시기에 어떤 활동을 집중적으로 했는지,\n어떤 분야가 언제부터 늘었는지 보여 줘요.' },
-  { view:'goal', target:'#goal-results', title:'목표와 관측 예정 별', text:'목표와 필요한 영역을 적으면 지금과 비교해 줘요.\n빈 영역은 관측 예정 별로 띄워 두세요.\n경험을 기록하면 자동으로 채워져요.' },
-  { view:'summary', target:'#analysis-card', title:'분석 결과', text:'경험이 쌓이면 반복되는 패턴을 정리해 드려요.\n데이터를 통해 나타나는 사용자님을 설명해 드려요.' },
+  { view:'timeline', target:'#timeline-chart-wrap', title:'타임라인', text:'어느 시기에 어떤 활동을 집중적으로 했는지,\n어떤 분야가 언제부터 늘었는지 보여줘요.' },
+  { view:'goal', target:'#goal-results', title:'목표와 관측 예정 별', text:'목표와 필요한 영역을 적으면 지금과 비교해줘요.\n빈 영역은 관측 예정 별로 띄워두세요.\n경험을 기록하면 자동으로 채워져요.' },
+  { view:'summary', target:'#analysis-card', title:'분석 결과', text:'경험이 쌓이면 반복되는 패턴을 정리해드려요.\n데이터를 통해 나타나는 사용자님을 설명해드려요.' },
   { title:'이제 당신 차례예요', text:'예시를 지우고 빈 하늘에서 시작할게요.\n첫 번째 별은 무엇이 될까요?', last:true },
 ];
 let tourI = 0, tourFresh = false;
