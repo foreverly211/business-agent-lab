@@ -26,3 +26,14 @@
 - 데이터는 각 사용자의 브라우저 `localStorage`에만 저장됩니다. 백업은 JSON 내보내기·불러오기로 합니다.
 - 그래프는 d3 7.8.5 (cdnjs)를 사용합니다.
 - 첫 방문 시 예시 학생 데이터로 튜토리얼을 보여 주고, 끝나면 빈 상태로 시작합니다.
+
+### 자동 점검 (qa/)
+
+`qa/qa.py`는 Playwright로 크롬을 열어 처음 방문한 사용자처럼 앱을 써 보며 27개 항목을 점검합니다. `qa/sample_state.json`은 불러오기 단계에서 쓰는 예시 백업입니다.
+
+```
+pip install playwright && playwright install chromium
+python qa/qa.py byeoljari/index.html run
+```
+
+결과는 `ok` / `!!` 줄로 출력되고, 화면은 `qa/shots/run/`에 저장됩니다.
