@@ -5,7 +5,7 @@
 **MYkrokosmos** (My + Mikrokosmos, 나만의 작은 우주) — 대학생이 자신의 경험을 기록하고, 경험과 태그가 이어진 별자리(Experience Graph)를 보며
 "내가 무엇을 해 왔는지, 나는 어떤 사람인지, 앞으로 무엇을 채워야 하는지"를 스스로 발견하는 서비스 프로토타입.
 
-- 앱: [`byeoljari/index.html`](byeoljari/index.html) — 파일 하나로 동작하는 웹 앱. 브라우저에서 바로 열면 됩니다.
+- 앱: [`MYkrokosmos/index.html`](MYkrokosmos/index.html) — 파일 하나로 동작하는 웹 앱. 브라우저에서 바로 열면 됩니다.
 - 기반 문서: 비즈니스에이전트설계 중간 기획서
 
 ### 주요 기능 (MVP)
@@ -33,7 +33,7 @@
 
 ```
 pip install playwright && playwright install chromium
-python qa/qa.py byeoljari/index.html run
+python qa/qa.py MYkrokosmos/index.html run
 ```
 
 결과는 `ok` / `!!` 줄로 출력되고, 화면은 `qa/shots/run/`에 저장됩니다.
