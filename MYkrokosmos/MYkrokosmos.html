@@ -13,20 +13,19 @@
 <style>
 /* Layout: Apple-style product site — translucent global nav, big headline per view, soft grey tiles; the constellation lives in one deep night-sky tile. */
 :root{
-  --bg:#ffffff; --bg-alt:#f5f5f7; --tile:#f5f5f7; --card:#ffffff;
+  --bg:#ffffff; --tile:#f5f5f7; --card:#ffffff;
   --fg:#1d1d1f; --fg-2:#6e6e73; --fg-3:#86868b; --line:#d2d2d7; --chip:#e8e8ed;
   --accent:#0071e3; --accent-fg:#ffffff; --link:#0066cc;
   --nav:rgba(251,251,253,.82); --scrim:rgba(0,0,0,.42);
   --ok:#1d7d3a; --ok-bg:#e3f4e8; --grow:#a15c00; --grow-bg:#fdf0dc; --need:#c4122e; --need-bg:#fde7ea;
   --star-on:#ff9f0a; --star-off:#d2d2d7;
   --sky:#04060c; --sky-2:#0b1226; --sky-fg:#f5f5f7; --sky-dim:rgba(245,245,247,.55);
-  --exp:#ffe3a3; --tag:#9fc6ff; --cat:#2997ff; --virt:rgba(255,255,255,.75);
-  --s1:#0a84ff; --s2:#ff9f0a; --s3:#28a745; --s4:#ff375f; --s5:#8e5cf6;
+  --exp:#ffe3a3;
   --f-sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
   --r-tile:28px; --r-card:18px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#000000; --bg-alt:#0d0d0f; --tile:#161618; --card:#1d1d1f;
+  --bg:#000000; --tile:#161618; --card:#1d1d1f;
   --fg:#f5f5f7; --fg-2:#a1a1a6; --fg-3:#86868b; --line:#3a3a3c; --chip:#2c2c2e;
   --accent:#0a84ff; --accent-fg:#ffffff; --link:#2997ff;
   --nav:rgba(22,22,23,.82); --scrim:rgba(0,0,0,.6);
@@ -34,7 +33,7 @@
   --star-on:#ffb340; --star-off:#48484a; color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#000000; --bg-alt:#0d0d0f; --tile:#161618; --card:#1d1d1f;
+  --bg:#000000; --tile:#161618; --card:#1d1d1f;
   --fg:#f5f5f7; --fg-2:#a1a1a6; --fg-3:#86868b; --line:#3a3a3c; --chip:#2c2c2e;
   --accent:#0a84ff; --accent-fg:#ffffff; --link:#2997ff;
   --nav:rgba(22,22,23,.82); --scrim:rgba(0,0,0,.6);
@@ -69,7 +68,6 @@ main{padding-inline:16px;padding-block:0 96px}
 .eyebrow{font-size:14px;font-weight:600;color:var(--fg-2);letter-spacing:0}
 .hero h1{font-size:clamp(34px,5.4vw,56px);font-weight:800;line-height:1.07;letter-spacing:-.035em}
 .hero p.lead{font-size:clamp(17px,2vw,21px);color:var(--fg-2);max-width:40em;line-height:1.38}
-.hero-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:8px}
 
 .tile{background:var(--tile);border-radius:var(--r-tile);padding:clamp(20px,3.4vw,40px);min-width:0}
 .tile h2{font-size:clamp(22px,2.6vw,28px);font-weight:700}
@@ -97,7 +95,8 @@ button.chip:hover{border-color:var(--line)}
 .chip small{opacity:.7;font-size:11px}
 
 /* sky */
-.sky{position:relative;background:radial-gradient(60% 55% at 18% 20%,rgba(70,90,255,.28),transparent 60%),radial-gradient(45% 50% at 88% 85%,rgba(47,211,255,.16),transparent 60%),radial-gradient(40% 45% at 70% 25%,rgba(190,120,255,.14),transparent 60%),radial-gradient(120% 90% at 50% 0%,#0d1530,#04060c 72%);border-radius:var(--r-tile);height:clamp(460px,72vh,780px);overflow:hidden;color:var(--sky-fg);color-scheme:dark}
+.sky,.night{background:radial-gradient(60% 55% at 18% 20%,rgba(70,90,255,.28),transparent 60%),radial-gradient(45% 50% at 88% 85%,rgba(47,211,255,.16),transparent 60%),radial-gradient(40% 45% at 70% 25%,rgba(190,120,255,.14),transparent 60%),radial-gradient(120% 90% at 50% 0%,#0d1530,#04060c 72%);}
+.sky{position:relative;border-radius:var(--r-tile);height:clamp(460px,72vh,780px);overflow:hidden;color:var(--sky-fg);color-scheme:dark}
 #graph-svg{position:relative;width:100%;height:100%;display:block;cursor:grab}
 #graph-svg:active{cursor:grabbing}
 .sky-tools{position:absolute;top:16px;left:16px;right:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;pointer-events:none}
@@ -105,20 +104,16 @@ button.chip:hover{border-color:var(--line)}
 .sky-btn{background:rgba(255,255,255,.1);color:var(--sky-fg);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);border-radius:999px;padding:7px 14px;font-size:13px}
 .sky-btn:hover{background:rgba(255,255,255,.18)}
 .sky-btn[aria-pressed="true"]{background:rgba(255,255,255,.9);color:#000}
-.legend{position:absolute;left:16px;bottom:16px;display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--sky-dim);background:rgba(0,0,0,.35);padding:8px 12px;border-radius:12px;backdrop-filter:blur(8px)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.lg{width:10px;height:10px;border-radius:50%;display:inline-block}
 #graph-bg{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
 .sky-tip{position:absolute;z-index:3;pointer-events:none;padding:6px 11px;border-radius:9px;background:rgba(245,245,247,.96);color:#0b1020;font-size:12.5px;font-weight:600;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.4)}
 .sky-tip small{font-weight:500;color:#5a6378;margin-left:6px}
-.sky-panel{position:absolute;z-index:2;left:16px;top:64px;width:min(320px,calc(100% - 32px));max-height:calc(100% - 32px);background:rgba(16,20,36,.92);box-shadow:0 24px 60px rgba(0,0,0,.55);backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:20px;overflow:auto;display:flex;flex-direction:column;gap:14px;font-size:14px}
+.sky-panel{position:absolute;z-index:2;left:16px;top:64px;width:min(320px,calc(100% - 32px));max-height:calc(100% - 32px);background:rgba(16,20,36,.92);box-shadow:0 24px 60px rgba(0,0,0,.55);backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:20px;overflow:auto;display:flex;flex-direction:column;gap:14px;font-size:14px;transition:left .15s,top .15s}
 .sky-panel h3{font-size:20px}
 .sky-panel .muted{color:var(--sky-dim)}
 .sky-panel .chip{background:rgba(255,255,255,.12);color:var(--sky-fg)}
 .sky-panel .list-item{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid rgba(255,255,255,.08);background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;width:100%;font-size:14px}
 .sky-panel .list-item:hover{color:#fff}
 .sky-panel .close{position:absolute;top:12px;right:12px}
-.sky-panel{transition:left .15s,top .15s}
 @media (prefers-reduced-motion: reduce){.sky-panel{transition:none}}
 .sky-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:24px}
 .sky-empty>div{pointer-events:auto;text-align:center;max-width:420px;display:flex;flex-direction:column;gap:12px;align-items:center}
@@ -142,8 +137,7 @@ button.chip:hover{border-color:var(--line)}
 .grad{background:linear-gradient(90deg,#2f6bff,#2fb8ff 55%,#3fd6a6);-webkit-background-clip:text;background-clip:text;color:transparent}
 .sky-search{margin-left:auto;display:flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 12px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:background .15s,border-color .15s}
 .sky-search:focus-within{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
-.sky-search svg{width:13px;height:13px}
-.sky-search svg{flex:none;opacity:.7}
+.sky-search svg{width:13px;height:13px;flex:none;opacity:.7}
 .sky-search input{background:transparent;border:0;color:#fff;font-size:13px;width:150px;padding:0;outline:none}
 .sky-search input::placeholder{color:rgba(245,245,247,.55)}
 .sky-search input::-webkit-search-cancel-button{filter:invert(1)}
@@ -264,7 +258,7 @@ textarea.input{width:100%;resize:vertical;line-height:1.6;font-size:16px}
 .bar.stack{display:flex}
 .bar.stack i{border-radius:0;flex:none}
 /* night tiles: the same sky as the constellation, for the chart screens */
-.night{position:relative;overflow:hidden;color:#f5f5f7;color-scheme:dark;background:radial-gradient(60% 55% at 18% 20%,rgba(70,90,255,.28),transparent 60%),radial-gradient(45% 50% at 88% 85%,rgba(47,211,255,.16),transparent 60%),radial-gradient(40% 45% at 70% 25%,rgba(190,120,255,.12),transparent 60%),radial-gradient(120% 90% at 50% 0%,#0d1530,#04060c 72%)}
+.night{position:relative;overflow:hidden;color:#f5f5f7;color-scheme:dark}
 .night::before,.analysis::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;background-image:radial-gradient(1px 1px at 23px 31px,#fff,transparent),radial-gradient(1px 1px at 141px 77px,#cfe0ff,transparent),radial-gradient(1.2px 1.2px at 88px 140px,#ffe6c4,transparent),radial-gradient(1px 1px at 190px 20px,#fff,transparent),radial-gradient(.8px .8px at 60px 95px,#fff,transparent),radial-gradient(1px 1px at 170px 150px,#d7e6ff,transparent);background-size:211px 173px}
 .night>*,.analysis>*{position:relative}
 .night h2,.night .insight{color:#f5f5f7}
@@ -318,7 +312,6 @@ textarea.input{width:100%;resize:vertical;line-height:1.6;font-size:16px}
 .sem li button{background:none;border:0;padding:4px 0;text-align:left;font-size:14px;color:var(--fg);width:100%}
 .sem li button:hover{color:var(--link)}
 .sem li small{color:var(--fg-3);font-variant-numeric:tabular-nums;margin-right:6px}
-.sem.empty-sem{opacity:.55}
 
 /* goal */
 .goal-form{display:flex;flex-direction:column;gap:16px}
@@ -376,7 +369,6 @@ textarea.input{width:100%;resize:vertical;line-height:1.6;font-size:16px}
 .map-table td{padding:10px 8px 10px 0;border-top:1px solid var(--line);vertical-align:top}
 .map-table td:first-child{font-weight:600;white-space:nowrap;width:1%}
 .map-wrap{overflow-x:auto}
-.radio-row{display:flex;gap:6px;flex-wrap:wrap}
 
 /* toast + tour */
 .toasts{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-width:calc(100% - 32px)}
@@ -464,7 +456,6 @@ function hasBatchim(w){ const s = String(w).trim(); const c = s.charCodeAt(s.len
   if (c >= 0xAC00 && c <= 0xD7A3) return (c - 0xAC00) % 28 !== 0;
   if (/[0-9]$/.test(s)) return /[013678]$/.test(s);
   return /[lmnr]$/i.test(s); }
-const J = (w, withB, noB) => w + (hasBatchim(w) ? withB : noB);
 const STAR = 'M12 2.6l2.85 6.05 6.6.8-4.88 4.55 1.28 6.55L12 17.3l-5.85 3.25 1.28-6.55L2.55 9.45l6.6-.8z';
 const TYPES = ['공모전','프로젝트','수업','동아리','대외활동','봉사','인턴','아르바이트','개인 경험','기타'];
 const GUIDES = [
@@ -766,7 +757,7 @@ function nodeMatches(d, q){
 }
 function searchHits(){
   const q = norm(searchQ); if (!q || !graphApi) return [];
-  const order = { exp: 0, virt: 1, tag: 2, cat: 3 };
+  const order = { exp: 0, virt: 1, tag: 2 };
   return graphApi.nodes.filter(d => nodeMatches(d, q)).sort((a, b) => order[a.type] - order[b.type]);
 }
 function applySearch(){
@@ -785,7 +776,7 @@ function jumpToMatch(dir){
   svg.transition().duration(650).call(zoom.translateTo, d.x, d.y);
   openPanel(d); applySearch();
   const cnt = $('#g-search-cnt'); if (cnt) cnt.textContent = `${searchIdx + 1} / ${hits.length}`;
-}   // marks the star recorded in this visit only; gone after a reload
+}
 
 function buildGraph(){
   const nodes = [], links = [], idx = new Map();
@@ -1039,7 +1030,6 @@ function drawGraph(){
   });
   // zone names sit above the stars so they can always be grabbed
   const nameG = g.append('g').attr('aria-hidden', 'true'); nameEl.forEach(el => nameG.node().appendChild(el));
-  node.selectAll('text').style('paint-order', 'stroke').style('stroke', 'rgba(7,5,6,.8)').style('stroke-width', '3px');
 
   const adj = new Map(nodes.map(n => [n.id, new Set([n.id])]));
   for (const l of links) { adj.get(l.source)?.add(l.target); adj.get(l.target)?.add(l.source); }
@@ -1213,13 +1203,6 @@ function openPanel(d){
       <p class="muted">경험 ${es.length}개에 등장해요${cats.length ? ` · ${cats.map(esc).join(', ')} 분야와 연결` : ''}.</p>
       <div>${es.map(e => `<button class="list-item" data-open-exp="${e.id}"><span>${esc(e.title)}</span><span class="muted">성장 ★${e.growth.toFixed(1)}</span></button>`).join('')}</div>
       <button class="sky-btn" id="gp-filter" style="align-self:flex-start">이 태그의 기록 모아보기</button>`;
-  } else if (d.type === 'cat') {
-    const c = d.ref;
-    const es = state.experiences.filter(e => catsForExp(e).includes(c.id));
-    h += `<div class="muted">전공 분야 · ${esc(c.group)}</div><h3>${esc(c.name)}</h3>
-      <p class="muted">이 분야와 이어진 경험 ${es.length}개</p>
-      <div>${es.slice(0, 8).map(e => `<button class="list-item" data-open-exp="${e.id}"><span>${esc(e.title)}</span><span class="muted">${e.date.slice(0, 7)}</span></button>`).join('')}</div>
-      <div class="muted" style="font-size:12px">연결 키워드: ${c.keywords.map(esc).join(', ') || '없음'}</div>`;
   } else {
     const v = d.ref;
     h += `<div class="muted">관측 예정 별 · ${fmtDate(v.createdAt)}에 추가</div><h3>${esc(v.label)}</h3>
@@ -1313,10 +1296,10 @@ function openDetail(id){
     </div>
     <div class="sheet-foot"><button class="btn btn-danger" id="dt-del">삭제</button><span class="spacer"></span><button class="btn btn-quiet" data-close>닫기</button><button class="btn btn-primary" id="dt-edit">편집</button></div>`);
   $('#dt-edit', layer).onclick = () => openEditor(e.id);
-  $('#dt-del', layer).onclick = async () => {
-    if (!await ask(`‘${esc(e.title)}’ 기록을 삭제할까요? 되돌릴 수 없어요.`, '삭제', true)) return;
-    if (commit(() => { state.experiences = state.experiences.filter(x => x.id !== e.id); })) { closeModal(); toast('기록을 삭제했어요.'); rerender(); }
-  };
+  $('#dt-del', layer).onclick = () => deleteExp(e);
+}
+async function deleteExp(e){
+  if (await ask(`‘${esc(e.title)}’ 기록을 삭제할까요? 되돌릴 수 없어요.`, '삭제', true) && commit(() => { state.experiences = state.experiences.filter(x => x.id !== e.id); })) { closeModal(); toast('기록을 삭제했어요.'); rerender(); }
 }
 
 /* ================= EDITOR ================= */
@@ -1468,8 +1451,7 @@ function openEditor(id, preset = {}){
   bindStars($('#ed-growth', layer), v => ed.growth = v);
   drawGuides(); drawTags(); drawSugg(); drawCats(); drawAtt();
   if (!src) $('#ed-title', layer).focus();
-  const del = $('#ed-del', layer);
-  if (del) del.onclick = async () => { if (await ask(`‘${esc(src.title)}’ 기록을 삭제할까요?`, '삭제', true) && commit(() => { state.experiences = state.experiences.filter(x => x.id !== src.id); })) { closeModal(); toast('기록을 삭제했어요.'); rerender(); } };
+  const del = $('#ed-del', layer); if (del) del.onclick = () => deleteExp(src);
   $('#ed-save', layer).onclick = () => {
     ed.title = $('#ed-title', layer).value.trim();
     ed.date = $('#ed-date', layer).value;
