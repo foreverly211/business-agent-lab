@@ -129,8 +129,10 @@ button.chip:hover{border-color:var(--line)}
 .sky-empty.compact h3{font-size:20px}
 .sky-empty.compact p{font-size:15px}
 .node{cursor:pointer;outline:none}
-.zone-name{cursor:grab}
-.zone-name:active{cursor:grabbing}
+/* a star's wide glow and the lines let the pointer through, so empty spots inside a zone grab the zone */
+#graph-svg .glow,#graph-links{pointer-events:none}
+.zone-name,.zone-area{cursor:grab}
+.zone-name:active,.zone-area:active{cursor:grabbing}
 .node .ret{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;opacity:0;transition:opacity .15s}
 .node:focus-visible .ret{opacity:.9;stroke:#2997ff}
 .node.selected .ret{opacity:1}
@@ -1014,9 +1016,9 @@ function drawGraph(){
       // halo star, like the survey photo: wide soft glow, tighter glow, bright white core
       const k = lightOf(d.ref);
       s.append('circle').attr('r', d.r * 2 + 6).attr('fill', 'transparent');
-      if (d.ref.id === justAdded) s.append('circle').attr('class', 'newbloom').attr('r', d.r * 8).attr('fill', `url(#halo-${k})`).attr('opacity', .3);
-      s.append('circle').attr('r', d.r * 6).attr('fill', `url(#halo-${k})`).attr('opacity', .28).style('mix-blend-mode', 'screen');
-      s.append('circle').attr('r', d.r * 2.6).attr('fill', `url(#halo-${k})`).attr('opacity', .45).style('mix-blend-mode', 'screen');
+      if (d.ref.id === justAdded) s.append('circle').attr('class', 'newbloom glow').attr('r', d.r * 8).attr('fill', `url(#halo-${k})`).attr('opacity', .3);
+      s.append('circle').attr('class', 'glow').attr('r', d.r * 6).attr('fill', `url(#halo-${k})`).attr('opacity', .28).style('mix-blend-mode', 'screen');
+      s.append('circle').attr('class', 'glow').attr('r', d.r * 2.6).attr('fill', `url(#halo-${k})`).attr('opacity', .45).style('mix-blend-mode', 'screen');
       s.append('circle').attr('r', d.r * 1.1).attr('fill', 'url(#core-w)').attr('opacity', .95);
       s.append('path').attr('class', 'ret').attr('d', ret(d.r * 2.2 + 8));
     } else if (d.type === 'tag') {
@@ -1117,17 +1119,28 @@ function drawGraph(){
       flingRAF = requestAnimationFrame(glide);
     }));
   node.on('dblclick', (e, d) => { e.stopPropagation(); pinCache.delete(d.id); d.fx = null; d.fy = null; sim.alpha(.3).restart(); });
-  // dragging a zone's name moves its whole cluster; like a single star, the cluster stays where it is dropped
-  let moving = [];
-  d3.selectAll([...nameEl.values()]).attr('class', 'zone-name').call(d3.drag()
+  // dragging a zone (its name or any empty spot inside it) moves its whole cluster;
+  // like a single star, the cluster stays where it is dropped
+  const zoneAt = (x, y, k0) => {   // where zones overlap, the one whose centre is nearest wins
+    let best = k0, bd = Infinity;
+    zoneG.each(function(k){
+      const e = d3.select(this).select('ellipse'), dx = (x - +e.attr('cx')) / +e.attr('rx'), dy = (y - +e.attr('cy')) / +e.attr('ry'), dd = dx * dx + dy * dy;
+      if (dd <= 1 && dd < bd) { bd = dd; best = k; }
+    });
+    return best;
+  };
+  let moving = [], movingK = null;
+  const zoneDrag = pick => d3.drag().clickDistance(4)
     .on('start', (e, k) => { hideTip(); cancelAnimationFrame(flingRAF); if (!e.active) sim.alphaTarget(.15).restart();
-      moving = nodes.filter(n => n.type === 'exp' && lightOf(n.ref) === k); moving.forEach(n => { n.fx = n.x; n.fy = n.y; }); })
-    .on('drag', (e, k) => { moving.forEach(n => { n.fx += e.dx; n.fy += e.dy; }); anchor[k].x += e.dx; anchor[k].y += e.dy; })
+      movingK = pick(e, k); moving = nodes.filter(n => n.type === 'exp' && lightOf(n.ref) === movingK); moving.forEach(n => { n.fx = n.x; n.fy = n.y; }); })
+    .on('drag', e => { moving.forEach(n => { n.fx += e.dx; n.fy += e.dy; }); anchor[movingK].x += e.dx; anchor[movingK].y += e.dy; })
     .on('end', e => {
       if (!e.active) sim.alphaTarget(0);
       moving.forEach(n => pinCache.set(n.id, { x: n.fx, y: n.fy })); moving = [];
       sim.force('x').x(sim.force('x').x()); sim.force('y').y(sim.force('y').y());   // re-read the moved zone's spot
-    }));
+    });
+  d3.selectAll([...nameEl.values()]).attr('class', 'zone-name').call(zoneDrag((e, k) => k));
+  zoneG.select('ellipse').attr('class', 'zone-area').call(zoneDrag((e, k) => zoneAt(e.x, e.y, k))).on('click', () => closePanel());
   if (panelNode) { const pn = nodes.find(n => n.id === panelNode); if (pn) { openPanel(pn); focus(pn.id); } else closePanel(); }
 }
 function enterViewing(){
