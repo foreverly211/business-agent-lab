@@ -129,6 +129,8 @@ button.chip:hover{border-color:var(--line)}
 .sky-empty.compact h3{font-size:20px}
 .sky-empty.compact p{font-size:15px}
 .node{cursor:pointer;outline:none}
+.zone-name{cursor:grab}
+.zone-name:active{cursor:grabbing}
 .node .ret{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;opacity:0;transition:opacity .15s}
 .node:focus-visible .ret{opacity:.9;stroke:#2997ff}
 .node.selected .ret{opacity:1}
@@ -980,13 +982,14 @@ function drawGraph(){
     .attr('fill', k => STARLIGHT[k][0]).attr('fill-opacity', .95)
     .style('paint-order', 'stroke').style('stroke', 'rgba(7,5,6,.8)').style('stroke-width', '4px')
     .text(k => typeName[k] || '');
+  const nameEl = new Map(); zoneG.select('text').each(function(k){ nameEl.set(k, this); });
   const placeZones = () => zoneG.each(function(k){
     const m = nodes.filter(n => n.type === 'exp' && lightOf(n.ref) === k); if (!m.length) return;
     const cx = m.reduce((a, n) => a + n.x, 0) / m.length, cy = m.reduce((a, n) => a + n.y, 0) / m.length;
     const rx = Math.max(80, ...m.map(n => Math.abs(n.x - cx) + n.r * 2.6 + 40)), ry = Math.max(64, ...m.map(n => Math.abs(n.y - cy) + n.r * 2.6 + 34));
     const z = d3.select(this);
     z.select('ellipse').attr('cx', cx).attr('cy', cy).attr('rx', rx).attr('ry', ry);
-    z.select('text').attr('x', cx).attr('y', cy - ry - 8);
+    d3.select(nameEl.get(k)).attr('x', cx).attr('y', cy - ry - 8);
   });
 
   const linkG = g.append('g').attr('id', 'graph-links');
@@ -1032,6 +1035,8 @@ function drawGraph(){
         .text(d.label + ' · 관측 예정');
     }
   });
+  // zone names sit above the stars so they can always be grabbed
+  const nameG = g.append('g').attr('aria-hidden', 'true'); nameEl.forEach(el => nameG.node().appendChild(el));
   node.selectAll('text').style('paint-order', 'stroke').style('stroke', 'rgba(7,5,6,.8)').style('stroke-width', '3px');
 
   const adj = new Map(nodes.map(n => [n.id, new Set([n.id])]));
@@ -1112,6 +1117,17 @@ function drawGraph(){
       flingRAF = requestAnimationFrame(glide);
     }));
   node.on('dblclick', (e, d) => { e.stopPropagation(); pinCache.delete(d.id); d.fx = null; d.fy = null; sim.alpha(.3).restart(); });
+  // dragging a zone's name moves its whole cluster; like a single star, the cluster stays where it is dropped
+  let moving = [];
+  d3.selectAll([...nameEl.values()]).attr('class', 'zone-name').call(d3.drag()
+    .on('start', (e, k) => { hideTip(); cancelAnimationFrame(flingRAF); if (!e.active) sim.alphaTarget(.15).restart();
+      moving = nodes.filter(n => n.type === 'exp' && lightOf(n.ref) === k); moving.forEach(n => { n.fx = n.x; n.fy = n.y; }); })
+    .on('drag', (e, k) => { moving.forEach(n => { n.fx += e.dx; n.fy += e.dy; }); anchor[k].x += e.dx; anchor[k].y += e.dy; })
+    .on('end', e => {
+      if (!e.active) sim.alphaTarget(0);
+      moving.forEach(n => pinCache.set(n.id, { x: n.fx, y: n.fy })); moving = [];
+      sim.force('x').x(sim.force('x').x()); sim.force('y').y(sim.force('y').y());   // re-read the moved zone's spot
+    }));
   if (panelNode) { const pn = nodes.find(n => n.id === panelNode); if (pn) { openPanel(pn); focus(pn.id); } else closePanel(); }
 }
 function enterViewing(){
