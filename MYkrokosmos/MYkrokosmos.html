@@ -1791,7 +1791,7 @@ function renderMe(){
       <div><button class="btn btn-primary btn-sm" id="me-save">저장</button></div>
     </div>
     <div class="tile">
-      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><div><h2>전공 분야</h2><p class="sub">별자리에서 고리 모양의 큰 별이 돼요. 전공 하나를 그대로 쓰거나 ‘산업·경영·공학’처럼 나눌 수 있어요.</p></div><button class="btn btn-secondary btn-sm" id="me-add-cat">+ 분야 추가</button></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><div><h2>전공 분야</h2><p class="sub">경험이 어떤 분야와 이어지는지 능력치와 요약에서 볼 수 있어요. 전공 하나를 그대로 쓰거나 ‘산업·경영·공학’처럼 나눌 수 있어요.</p></div><button class="btn btn-secondary btn-sm" id="me-add-cat">+ 분야 추가</button></div>
       <div id="me-cats" style="margin-top:12px">${state.categories.length ? state.categories.map(c => `
         <div class="cat-row" data-cat="${c.id}">
           <div class="cat-head"><input class="input" data-cname value="${esc(c.name)}" aria-label="분야 이름"><span class="grp">${esc(c.group || '')}</span>
@@ -1853,7 +1853,7 @@ function openSplit(c){
   const layer = openModal(`
     <div class="sheet-head"><h2>‘${esc(c.name)}’ 나누기</h2><button class="icon-btn" data-close aria-label="닫기">×</button></div>
     <div class="sheet-body" style="display:flex;flex-direction:column;gap:12px">
-      <p style="color:var(--fg-2);font-size:15px">세부 분야를 쉼표로 구분해 적어 주세요. 각각이 별자리의 큰 별이 돼요.</p>
+      <p style="color:var(--fg-2);font-size:15px">세부 분야를 쉼표로 구분해 적어 주세요. 능력치와 요약에서 각각 따로 보여 드려요.</p>
       <input class="input" id="sp-in" placeholder="예: 산업, 경영, 공학">
     </div>
     <div class="sheet-foot"><button class="btn btn-quiet" data-close>취소</button><button class="btn btn-primary" id="sp-ok">나누기</button></div>`, 'narrow');
