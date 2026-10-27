@@ -979,7 +979,10 @@ function drawGraph(){
   const placeZones = () => zoneG.each(function(k){
     const m = nodes.filter(n => n.type === 'exp' && lightOf(n.ref) === k); if (!m.length) return;
     const cx = m.reduce((a, n) => a + n.x, 0) / m.length, cy = m.reduce((a, n) => a + n.y, 0) / m.length;
-    const rx = Math.max(80, ...m.map(n => Math.abs(n.x - cx) + n.r * 2.6 + 40)), ry = Math.max(64, ...m.map(n => Math.abs(n.y - cy) + n.r * 2.6 + 34));
+    let rx = Math.max(80, ...m.map(n => Math.abs(n.x - cx) + n.r * 2.6 + 40)), ry = Math.max(64, ...m.map(n => Math.abs(n.y - cy) + n.r * 2.6 + 34));
+    // sized per axis, the ellipse misses a star that is far out on both axes (a corner), so grow it until every glow fits
+    const f = Math.max(1, ...m.map(n => Math.hypot((Math.abs(n.x - cx) + n.r * 2.6 + 12) / rx, (Math.abs(n.y - cy) + n.r * 2.6 + 12) / ry)));
+    rx *= f; ry *= f;
     const z = d3.select(this);
     z.select('ellipse').attr('cx', cx).attr('cy', cy).attr('rx', rx).attr('ry', ry);
     d3.select(nameEl.get(k)).attr('x', cx).attr('y', cy - ry - 8);
