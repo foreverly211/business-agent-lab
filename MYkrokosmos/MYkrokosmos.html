@@ -2007,7 +2007,8 @@ const begin = () => {
   else { const v = recall('view'); go(RENDER[v] ? v : 'graph'); }
 };
 go('graph');
-if (!state.profile.name) openWelcome(begin); else begin();
+// no name yet means a fresh start (first visit, or after 모든 기록 지우기), so the tour follows the welcome
+if (!state.profile.name) openWelcome(() => startTour(!state.experiences.length)); else begin();
 let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (view === 'graph') drawGraph(); }, 200); });
 })();
 </script>
